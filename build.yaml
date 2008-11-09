@@ -1,1 +1,30 @@
-#!/bin/sweetpotato
+sweetpotato:
+  build:
+    - echo: hello world!
+    - db: 
+        type: sweetpotato
+        path: buid.yaml
+        read: 
+          root: numbers
+          target: echoRow
+          fields: 
+            id: numberNumeral
+            name: numberName
+
+  setRange:
+    - property: {'name':range,'value':100}
+
+  range:
+    - include: setRange
+    - do: {'target':build, 'range':'@@setRange.range@@'}
+
+  echoRow:
+    echo: '@@build.id@@ = @@build.name@@'
+
+numbers: 
+  - row: {'id':1,'name':one}
+  - row: {'id':2,'name':two}
+  - row: {'id':3,'name':three}
+  - row: {'id':4,'name':four}
+  - row: {'id':5,'name':five}
+
