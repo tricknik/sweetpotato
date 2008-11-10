@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys
 import yaml
-import sweetpotatocore
 
 class Task:
 	target = None
