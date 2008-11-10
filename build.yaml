@@ -2,9 +2,10 @@ sweetpotato:
   build:
     - echo: hello world!
     - db: 
-        type: sweetpotato
-        path: buid.yaml
-        read: 
+      type: sweetpotato
+      path: buid.yaml
+      do:
+        - read: 
           root: numbers
           target: echoRow
           fields: 
@@ -16,10 +17,10 @@ sweetpotato:
 
   range:
     - include: setRange
-    - do: {'target':build, 'range':'@@setRange.range@@'}
+    - call: {'target':build, 'range':'@@setRange.range@@'}
 
   echoRow:
-    echo: '@@build.id@@ = @@build.name@@'
+    - echo: '@@build.id@@ = @@build.name@@'
 
 numbers: 
   - row: {'id':1,'name':one}
