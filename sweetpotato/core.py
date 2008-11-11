@@ -9,14 +9,16 @@ class Task:
 		self.type = task
 		self.read(data)
 	def read(self, data):
-		if data is dict:
-			pass
-		elif data is list:
+		if hasattr(data,'keys'):
+			for attr in data.keys():
+				setattr(self,attr,data[attr])
+		elif hasattr(data,'append'):
 			pass
 		else:
 			self.value = data
 	def run(self):
 		print self.type, 'has nothing to do.'
+
 class Target:
 	sweetpotato = None
 	name = None
@@ -50,9 +52,15 @@ class Echo(Task):
 	def run(self):
 		print self.value
 
+class Db(Task):
+	def run(self):
+		print self.path
+
 def taskLoader(self, taskType, taskData):
 	if 'echo' == taskType:
 		task = Echo(self, taskType, taskData)
+	if 'db' == taskType:
+		task = Db(self, taskType, taskData)
 	else:
 		task = Task(self, taskType, taskData)
 	return task

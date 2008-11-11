@@ -2,15 +2,15 @@ sweetpotato:
   build:
     - echo: hello world!
     - db: 
-      type: sweetpotato
-      path: buid.yaml
-      do:
-        - read: 
-          root: numbers
-          target: echoRow
-          fields: 
-            id: numberNumeral
-            name: numberName
+        type: sweetpotato
+        path: buid.yaml
+        do:
+          - read: 
+              root: numbers
+              target: echoRow
+              fields: 
+                id: numberNumeral
+                name: numberName
 
   setRange:
     - property: {'name':range,'value':100}
