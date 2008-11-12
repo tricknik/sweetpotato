@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 sys.path.append('/dk/work/sweetpotato')
-from sweetpotato.core import Task, Target, SweetPotato
+from sweetpotato.core import Task, SweetPotato
 
 if 3 > len(sys.argv):
 	fileName = 'build.yaml'

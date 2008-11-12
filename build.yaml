@@ -6,11 +6,12 @@ sweetpotato:
         path: buid.yaml
         do:
           - read: 
-              root: numbers
-              target: echoRow
-              fields: 
-                id: numberNumeral
-                name: numberName
+             root: numbers
+             target: echoRow
+             fields: 
+               id: numberNumeral
+               name: numberName
+    - echo: done!
 
   setRange:
     - property: {'name':range,'value':100}

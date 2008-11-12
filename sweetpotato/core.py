@@ -1,40 +1,62 @@
 import yaml
 
 class Task:
-	target = None
-	type = None
-	value = None
-	def __init__(self, target, task, data):
-		self.target = target
+	def __init__(self, parent, task, data):
+		self.tasks = []
+		self.attributes={}
+		self.type = None
+		self.parent = parent
 		self.type = task
-		self.read(data)
-	def read(self, data):
-		if hasattr(data,'keys'):
-			for attr in data.keys():
-				setattr(self,attr,data[attr])
-		elif hasattr(data,'append'):
-			pass
+		self.read('value', data)
+		self.tasks.reverse()
+	def read(self, attribute, data):
+		if hasattr(data,'popitem'):
+			self.setAttributes(data)
+		elif hasattr(data,'pop'):
+			self.addChildTasks(data)
 		else:
-			self.value = data
-	def run(self):
-		print self.type, 'has nothing to do.'
+			if self.attributes.has_key(attribute):
+				raise Exception, str(self) + ': Duplicate Attribute'
+			else:
+				self.attributes[attribute] = data
+	def setAttributes(self, data):
+		while data:
+			key, value = data.popitem()
+			if hasattr(value, 'popitem'):
+				self.addChildTasks([{key:value}])
+			else:
+				self.read(key, value)
+	def addChildTasks(self, data):
+		while data:
+			value = data.pop()
+			if hasattr(value, 'popitem'):	
+				itemkey, itemvalue = value.popitem()
+				child = Task(self, itemkey, itemvalue)
+				self.tasks.append(child)
+				if (value):
+					raise Exception, 'Only 1 key alowed in Task'
+			else:
+				raise Exception, "Task must be {'key': value}"
 
-class Target:
-	sweetpotato = None
-	name = None
-	tasks = []
-	def __init__(self, sweetpotato, target, targetData):
-		self.sweetpotato = sweetpotato
-		self.name = target
-		for taskDict in targetData:
-			taskItem = taskDict.popitem();
-			taskType = taskItem[0]
-			taskData = taskItem[1]
-			task = taskLoader(self, taskType, taskData)
-			self.tasks.append(task)
 	def run(self):
+		if 'echo' == self.type:
+			print self.attributes['value']
 		for task in self.tasks:
-			task.run()
+			if task.parent is self:
+				task.run()
+			else:
+				raise Exception, '%s does not belong to %s' % (task, self)
+		print self, 'has nothing more to do.'
+
+	def __str__(self):
+		t = self
+		s = [self.type]
+		while t.parent:
+			s.append(t.parent.type)
+			t = t.parent
+		s.reverse()
+		p = '.'.join(s)
+		return p
 
 class SweetPotato:
 	buildData = None
@@ -42,25 +64,13 @@ class SweetPotato:
 	def __init__(self,file):
 		yamlData =  yaml.load(open(file))
 		self.buildData = yamlData['sweetpotato']
-	def run(self,target):
+	def getTarget(self, target):
 		if not self.targets.has_key(target):
-			self.targets[target] = Target(self, target, self.buildData[target])
+			self.targets[target] = Task(None, 'target', self.buildData[target])
 			del self.buildData[target]
-		self.targets[target].run()
+		return self.targets[target]
+	def run(self,targetName):
+		target = self.getTarget(targetName)
+		print 'running', targetName
+		target.run()
 
-class Echo(Task):
-	def run(self):
-		print self.value
-
-class Db(Task):
-	def run(self):
-		print self.path
-
-def taskLoader(self, taskType, taskData):
-	if 'echo' == taskType:
-		task = Echo(self, taskType, taskData)
-	if 'db' == taskType:
-		task = Db(self, taskType, taskData)
-	else:
-		task = Task(self, taskType, taskData)
-	return task
