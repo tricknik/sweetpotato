@@ -38,15 +38,21 @@ class Task:
 			else:
 				raise Exception, "Task must be {'key': value}"
 
+	def initAdapter(self):
+		fromList = ['sweetpotato','tasks']
+		from copy import copy
+		nameList = copy(fromList)
+		nameList.append(self.type)
+		adapterName = '.'.join(nameList)
+		taskAdapterClass = __import__(adapterName, fromlist=fromList)
+		taskAdapterClass.__init__(self)
 	def run(self):
-		if 'echo' == self.type:
-			print self.attributes['value']
+		self.initAdapter()
 		for task in self.tasks:
 			if task.parent is self:
 				task.run()
 			else:
 				raise Exception, '%s does not belong to %s' % (task, self)
-		print self, 'has nothing more to do.'
 
 	def __str__(self):
 		t = self
@@ -71,6 +77,5 @@ class SweetPotato:
 		return self.targets[target]
 	def run(self,targetName):
 		target = self.getTarget(targetName)
-		print 'running', targetName
 		target.run()
 
