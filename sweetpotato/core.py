@@ -6,9 +6,11 @@ class Task:
 		self.attributes={}
 		self.type = None
 		self.parent = parent
+		self.adapter = None
 		self.type = task
 		self.read('value', data)
 		self.tasks.reverse()
+
 	def read(self, attribute, data):
 		if hasattr(data,'popitem'):
 			self.setAttributes(data)
@@ -19,6 +21,7 @@ class Task:
 				raise Exception, str(self) + ': Duplicate Attribute'
 			else:
 				self.attributes[attribute] = data
+
 	def setAttributes(self, data):
 		while data:
 			key, value = data.popitem()
@@ -26,6 +29,7 @@ class Task:
 				self.addChildTasks([{key:value}])
 			else:
 				self.read(key, value)
+
 	def addChildTasks(self, data):
 		while data:
 			value = data.pop()
@@ -39,12 +43,15 @@ class Task:
 				raise Exception, "Task must be {'key': value}"
 
 	def initAdapter(self):
-		adapter = self.importAdapter(self.parent.type)
-		if hasattr(adapter,'__dict__') and adapter.__dict__.has_key(self.type):
-			print "DICT!!"
+		if hasattr(self.parent.adapter,self.type):
+			self.adapter = getattr(self.parent.adapter,self.type)(self)
 		else:
-			adapter = self.importAdapter(self.type)
-			adapter.__init__(self)
+			module = self.importAdapter(self.parent.type)
+			if hasattr(module,'__dict__') and module.__dict__.has_key(self.type):
+				self.adapter = module.__dict__[self.type](self)
+			else:
+				self.adapter = self.importAdapter(self.type)
+				self.adapter.__init__(self)
 		
 	def importAdapter(self, type):
 		from copy import copy
@@ -53,7 +60,9 @@ class Task:
 		nameList.append(type)
 		adapter = '.'.join(nameList)
 		return __import__(adapter, fromlist=fromList)
+
 	def run(self):
+		print '::', self
 		if self.parent:
 			self.initAdapter()
 		for task in self.tasks:

@@ -2,5 +2,8 @@ def __init__(task):
 	print 'initializing db'
 
 class read:
-	def __init__(self):
+	def __init__(self, task):
 		pass
+	class fields:
+		def __init__(self, task):
+			pass
