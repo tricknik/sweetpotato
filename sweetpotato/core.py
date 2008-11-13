@@ -39,15 +39,23 @@ class Task:
 				raise Exception, "Task must be {'key': value}"
 
 	def initAdapter(self):
-		fromList = ['sweetpotato','tasks']
+		adapter = self.importAdapter(self.parent.type)
+		if hasattr(adapter,'__dict__') and adapter.__dict__.has_key(self.type):
+			print "DICT!!"
+		else:
+			adapter = self.importAdapter(self.type)
+			adapter.__init__(self)
+		
+	def importAdapter(self, type):
 		from copy import copy
+		fromList = ['sweetpotato','tasks']
 		nameList = copy(fromList)
-		nameList.append(self.type)
-		adapterName = '.'.join(nameList)
-		taskAdapterClass = __import__(adapterName, fromlist=fromList)
-		taskAdapterClass.__init__(self)
+		nameList.append(type)
+		adapter = '.'.join(nameList)
+		return __import__(adapter, fromlist=fromList)
 	def run(self):
-		self.initAdapter()
+		if self.parent:
+			self.initAdapter()
 		for task in self.tasks:
 			if task.parent is self:
 				task.run()
