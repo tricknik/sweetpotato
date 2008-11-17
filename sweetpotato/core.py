@@ -1,7 +1,6 @@
 import yaml, re
 
 class Task:
-	regex = re.compile('\{\{([^}]+)\}\}')
 	def __init__(self, sweetpotato, parent, type, data):
 		self.tasks = []
 		self.attributes = {}
@@ -66,12 +65,12 @@ class Task:
 			property = self.sweetpotato.properties[key]	
 		else:
 			property = None
-		return property
+		return str(property)
 	def getAttribute(self, key):
 		if key in self.attributes:
 			if hasattr(self.attributes[key],'islower'):
 				attribute = self.attributes[key]
-				expanded = re.sub(self.regex, self.expand, attribute)
+				expanded = re.sub(self.sweetpotato.regex, self.expand, attribute)
 			else:
 				expanded = self.attributes[key]
 		else:
@@ -96,6 +95,7 @@ class Task:
 		return strType
 
 class SweetPotato:
+	regex = re.compile('\{\{([^}]+)\}\}')
 	def __init__(self, options):
 		self.options = options
 		self.properties = {}
