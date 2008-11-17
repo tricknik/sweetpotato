@@ -3,7 +3,7 @@ sweetpotato:
     - echo: hello world!
     - db: 
         type: sweetpotato
-        path: buid.yaml
+        path: /home/dk/work/sweetpotato/build.yaml
         do:
           - read: 
              root: numbers
@@ -18,15 +18,15 @@ sweetpotato:
 
   range:
     - include: setRange
-    - call: {'target':build, 'range':'@@setRange.range@@'}
+    - call: {'target':build, 'range':'{{range}}'}
 
   echoRow:
-    - echo: '@@build.id@@ = @@build.name@@'
+    - echo: '{{numberNumeral}} = {{numberName}}'
 
 numbers: 
-  - row: {'id':1,'name':one}
-  - row: {'id':2,'name':two}
-  - row: {'id':3,'name':three}
-  - row: {'id':4,'name':four}
-  - row: {'id':5,'name':five}
+  - {'id':1,'name':one}
+  - {'id':2,'name':two}
+  - {'id':3,'name':three}
+  - {'id':4,'name':four}
+  - {'id':5,'name':five}
 
