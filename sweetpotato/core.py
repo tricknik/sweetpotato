@@ -11,7 +11,6 @@ class Task:
 		self.type = type
 		self.read('value', data)
 		self.tasks.reverse()
-
 	def read(self, attribute, data):
 		if hasattr(data,'popitem'):
 			self.setAttributes(data)
@@ -26,10 +25,8 @@ class Task:
 	def setAttributes(self, data):
 		while data:
 			key, value = data.popitem()
-			if hasattr(value, 'popitem'):
+			if hasattr(value, 'pop'):
 				self.addChildTasks([{key:value}])
-			else:
-				self.read(key, value)
 
 	def addChildTasks(self, data):
 		while data:
@@ -44,8 +41,13 @@ class Task:
 				raise Exception, "Task must be {'key': value}"
 
 	def loadAdapter(self):
-		if hasattr(self.parent.adapter, self.type):
-			module = self.parent.adapter
+		adapter = self.parent.adapter
+		if hasattr(adapter, 'inheritModule'):
+			while adapter.inheritModule:
+				adapter = adapter.task.parent.adapter
+				print 'inheriting module', adapter
+		if hasattr(adapter, self.type):
+			module = adapter
 		else:
 			module = self.importModule(self.type)
 		self.adapter = getattr(module, self.type)(self)
@@ -112,7 +114,6 @@ class SweetPotato:
 		self.startTime = None
 	def setProperty(self, key, value):
 		self.properties[key.strip().lower()] = value
-
 	def getTarget(self, target):
 		if not self.targets.has_key(target):
 			self.targets[target] = \
