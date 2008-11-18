@@ -4,7 +4,7 @@ sweetpotato:
     - db: 
         type: sweetpotato
         path: /home/dk/work/sweetpotato/build.yaml
-        do:
+        run:
           - read: 
              root: numbers
              target: echoRow
@@ -18,7 +18,7 @@ sweetpotato:
 
   range:
     - include: setRange
-    - call: {'target':build, 'range':'{{range}}'}
+    - run: {'target':build, 'range':'{{range}}'}
 
   echo:
     - echo: nothing to replace here

@@ -1,5 +1,4 @@
 from adapter import TaskAdapter
-from pprint import pprint
 
 class db(TaskAdapter):
 	types = {}
@@ -14,7 +13,6 @@ class db(TaskAdapter):
 				self.setProperties(row)
 				if 'target' in self.task.attributes:
 					target = self.task.attributes['target']
-					print self.task.sweetpotato.properties
 					sweetpotato.run(target)
 		def setProperties(self, row):
 			sweetpotato = self.task.sweetpotato				
