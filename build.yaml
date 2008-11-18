@@ -6,12 +6,13 @@ sweetpotato:
         path: /home/dk/work/sweetpotato/build.yaml
         run:
           - read: 
-             root: numbers
-             target: echoRow
-             fields: 
-               id: numberNumeral
-               name: numberName
-    - echo: done!
+              root: numbers
+              target: echoRow
+              fields: 
+                id: numberNumeral
+                name: numberName
+    - run:
+       - echo: done!
 
   setRange:
     - property: {'name':range,'value':100}

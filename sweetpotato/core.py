@@ -13,7 +13,7 @@ class Task:
 		self.tasks.reverse()
 	def read(self, attribute, data):
 		if hasattr(data,'popitem'):
-			self.setAttributes(data)
+			self.readDict(data)
 		elif hasattr(data,'pop'):
 			self.addChildTasks(data)
 		else:
@@ -22,11 +22,13 @@ class Task:
 			else:
 				self.attributes[attribute] = data
 
-	def setAttributes(self, data):
+	def readDict(self, data):
 		while data:
 			key, value = data.popitem()
 			if hasattr(value, 'pop'):
 				self.addChildTasks([{key:value}])
+			else:
+				self.read(key, value)
 
 	def addChildTasks(self, data):
 		while data:
@@ -40,14 +42,18 @@ class Task:
 			else:
 				raise Exception, "Task must be {'key': value}"
 
+	def getParent(self):
+		parent = self.parent
+		if hasattr(parent, 'adapter') and \
+				hasattr(parent.adapter, 'inheritModule'):
+			while parent.adapter and parent.adapter.inheritModule:
+				parent = parent.adapter.task.parent
+				print self, 'inheriting fom', parent
+		return parent
 	def loadAdapter(self):
-		adapter = self.parent.adapter
-		if hasattr(adapter, 'inheritModule'):
-			while adapter.inheritModule:
-				adapter = adapter.task.parent.adapter
-				print 'inheriting module', adapter
-		if hasattr(adapter, self.type):
-			module = adapter
+		parent = self.getParent()
+		if hasattr(parent.adapter, self.type):
+			module = parent.adapter
 		else:
 			module = self.importModule(self.type)
 		self.adapter = getattr(module, self.type)(self)
