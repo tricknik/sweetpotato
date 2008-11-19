@@ -19,8 +19,13 @@ class Task:
 		else:
 			self.setAttribute(attribute, data)
 	def setAttribute(self, attribute, value):
+		print self, attribute, value
 		if self.attributes.has_key(attribute):
-			raise Exception, str(self) + ': Duplicate Attribute'
+			if hasattr(self.attributes[attribute],'appendleft'):
+				self.attributes[attribute].appendleft(value)
+			else:
+				value = deque([value, self.attributes[attribute]])
+				self.attributes[attribute] = value
 		else:
 			self.attributes[attribute] = value
 	def readDict(self, data):
