@@ -1,4 +1,4 @@
 class TaskAdapter:
-	inheritModule = False
+	inherit = False
 	def __init__(self, task):
 		self.task = task

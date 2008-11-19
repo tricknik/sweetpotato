@@ -11,8 +11,7 @@ sweetpotato:
               fields: 
                 id: numberNumeral
                 name: numberName
-    - run:
-       - echo: done!
+    - echo: done!
 
   setRange:
     - property: {'name':range,'value':100}

@@ -1,8 +1,9 @@
+from collections import deque
 import yaml, re
 
 class Task:
 	def __init__(self, sweetpotato, parent, type, data):
-		self.tasks = []
+		self.tasks = deque()
 		self.attributes = {}
 		self.sweetpotato = sweetpotato
 		self.type = None
@@ -10,43 +11,47 @@ class Task:
 		self.adapter = None
 		self.type = type
 		self.read('value', data)
-		self.tasks.reverse()
 	def read(self, attribute, data):
 		if hasattr(data,'popitem'):
 			self.readDict(data)
 		elif hasattr(data,'pop'):
-			self.addChildTasks(data)
+			self.readList(data, attribute)
 		else:
-			if self.attributes.has_key(attribute):
-				raise Exception, str(self) + ': Duplicate Attribute'
-			else:
-				self.attributes[attribute] = data
-
+			self.setAttribute(attribute, data)
+	def setAttribute(self, attribute, value):
+		if self.attributes.has_key(attribute):
+			raise Exception, str(self) + ': Duplicate Attribute'
+		else:
+			self.attributes[attribute] = value
 	def readDict(self, data):
 		while data:
 			key, value = data.popitem()
 			if hasattr(value, 'pop'):
-				self.addChildTasks([{key:value}])
+				self.readList([{key:value}])
 			else:
-				self.read(key, value)
-
-	def addChildTasks(self, data):
+				self.setAttribute(key, value)
+	def readList(self, data, attribute='value'):
 		while data:
 			value = data.pop()
 			if hasattr(value, 'popitem'):	
-				itemkey, itemvalue = value.popitem()
-				child = Task(self.sweetpotato, self, itemkey, itemvalue)
-				self.tasks.append(child)
-				if (value):
-					raise Exception, 'Only 1 key alowed in Task'
+				self.addChildTask(value)
 			else:
-				raise Exception, "Task must be {'key': value}"
+				self.setAttribute(attribute, value)
+	def addChildTask(self, value, attribute='value'):
+		if hasattr(value, 'popitem'):	
+			itemkey, itemvalue = value.popitem()
+			child = Task(self.sweetpotato, self, itemkey, itemvalue)
+			self.tasks.appendleft(child)
+			if (value):
+				raise Exception, 'Only 1 key alowed in Task'
+		else:
+			raise Exception, "Task must be {'key': value}"
 
 	def getParent(self):
 		parent = self.parent
 		if hasattr(parent, 'adapter') and \
-				hasattr(parent.adapter, 'inheritModule'):
-			while parent.adapter and parent.adapter.inheritModule:
+				hasattr(parent.adapter, 'inherit'):
+			while parent.adapter and parent.adapter.inherit:
 				parent = parent.adapter.task.parent
 				print self, 'inheriting fom', parent
 		return parent
@@ -93,12 +98,11 @@ class Task:
 			self.adapter.run()
 	def __str__(self):
 		task = self
-		typePath = [self.type]
+		typePath = deque([self.type])
 		while task.parent:
 			if task.parent.adapter:
-				typePath.append(task.parent.type)
+				typePath.appendleft(task.parent.type)
 			task = task.parent
-		typePath.reverse()
 		strType = '.'.join(typePath)
 		return strType
 
