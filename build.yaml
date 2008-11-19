@@ -6,13 +6,15 @@ sweetpotato:
     - db: 
         type: sweetpotato
         path: build.yaml
-        run:
+        do:
           - read: 
               root: numbers
               target: echoRow
-              fields: 
-                id: numberNumeral
-                name: numberName
+              do:
+                - echo: {'value': reading}
+                - fields: 
+                    id: numberNumeral
+                    name: numberName
     - echo: done!
 
   setRange:

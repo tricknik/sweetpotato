@@ -122,9 +122,10 @@ class Task:
 	def __str__(self):
 		task = self
 		typePath = deque([self.type])
-		while task.parent:
-			if task.parent.adapter:
-				typePath.appendleft(task.parent.type)
+		while task and task.parent:
+			task = task.getParent()
+			if task.adapter:
+				typePath.appendleft(task.type)
 			task = task.parent
 		strType = ".".join(typePath)
 		return strType

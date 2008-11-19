@@ -1,4 +1,4 @@
 from adapter import TaskAdapter
 
-class run(TaskAdapter):
+class do(TaskAdapter):
 	inherit = True
