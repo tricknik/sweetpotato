@@ -64,10 +64,13 @@ class Task:
 		return parent
 
 	def loadAdapter(self):
-		parent = self.getParent()
-		if hasattr(parent.adapter, self.type):
-			module = parent.adapter
-		else:
+		module = None
+		parent = self.parent
+		while parent:
+			if hasattr(parent.adapter, self.type):
+				module = parent.adapter
+			parent = parent.parent
+		if not module:
 			module = self.importModule(self.type)
 		self.adapter = getattr(module, self.type)(self)
 
