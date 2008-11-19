@@ -172,4 +172,3 @@ class SweetPotato:
 		self.log(":: %s" % targetName.upper())
 		target = self.getTarget(targetName)
 		target.run()
-		self.log("\n")

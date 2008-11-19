@@ -5,7 +5,7 @@ sweetpotato:
     - echo: hello world!
     - db: 
         type: sweetpotato
-        path: /home/dk/work/sweetpotato/build.yaml
+        path: build.yaml
         run:
           - read: 
               root: numbers
