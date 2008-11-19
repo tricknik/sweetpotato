@@ -6,60 +6,63 @@ class Task:
 		self.tasks = deque()
 		self.attributes = {}
 		self.sweetpotato = sweetpotato
-		self.type = None
 		self.parent = parent
 		self.adapter = None
-		self.type = type
-		self.read('value', data)
+		self.type = str(type)
+		self.read("value", data)
+
 	def read(self, attribute, data):
-		if hasattr(data,'popitem'):
+		if hasattr(data,"popitem"):
 			self.readDict(data)
-		elif hasattr(data,'pop'):
+		elif hasattr(data,"pop"):
 			self.readList(data, attribute)
 		else:
 			self.setAttribute(attribute, data)
+
 	def setAttribute(self, attribute, value):
-		print self, attribute, value
 		if self.attributes.has_key(attribute):
-			if hasattr(self.attributes[attribute],'appendleft'):
+			if hasattr(self.attributes[attribute],"appendleft"):
 				self.attributes[attribute].appendleft(value)
 			else:
 				value = deque([value, self.attributes[attribute]])
 				self.attributes[attribute] = value
 		else:
 			self.attributes[attribute] = value
+
 	def readDict(self, data):
 		while data:
 			key, value = data.popitem()
-			if hasattr(value, 'pop'):
+			if hasattr(value, "pop"):
 				self.readList([{key:value}])
 			else:
 				self.setAttribute(key, value)
-	def readList(self, data, attribute='value'):
+
+	def readList(self, data, attribute="value"):
 		while data:
 			value = data.pop()
-			if hasattr(value, 'popitem'):	
+			if hasattr(value, "popitem"):	
 				self.addChildTask(value)
 			else:
 				self.setAttribute(attribute, value)
-	def addChildTask(self, value, attribute='value'):
-		if hasattr(value, 'popitem'):	
+
+	def addChildTask(self, value, attribute="value"):
+		if hasattr(value, "popitem"):	
 			itemkey, itemvalue = value.popitem()
 			child = Task(self.sweetpotato, self, itemkey, itemvalue)
 			self.tasks.appendleft(child)
 			if (value):
-				raise Exception, 'Only 1 key alowed in Task'
+				raise Exception, "Only 1 key alowed in Task"
 		else:
-			raise Exception, "Task must be {'key': value}"
+			raise Exception, "Task must be {key: value}"
 
 	def getParent(self):
 		parent = self.parent
-		if hasattr(parent, 'adapter') and \
-				hasattr(parent.adapter, 'inherit'):
+		if hasattr(parent, "adapter") and \
+				hasattr(parent.adapter, "inherit"):
 			while parent.adapter and parent.adapter.inherit:
 				parent = parent.adapter.task.parent
-				print self, 'inheriting fom', parent
 		return parent
+
 	def loadAdapter(self):
 		parent = self.getParent()
 		if hasattr(parent.adapter, self.type):
@@ -67,15 +70,18 @@ class Task:
 		else:
 			module = self.importModule(self.type)
 		self.adapter = getattr(module, self.type)(self)
+
 	def importModule(self, type):
 		from copy import copy
-		fromList = ['sweetpotato','tasks']
+		fromList = ["sweetpotato","tasks"]
 		nameList = copy(fromList)
 		nameList.append(type)
-		taskModule = '.'.join(nameList)
+		taskModule = ".".join(nameList)
 		return __import__(taskModule, fromlist=fromList)
+
 	def log(self, message):
 		self.sweetpotato.log(message, self)
+
 	def expand(self, value):
 		key = value.groups()[0].strip().lower()
 		if self.sweetpotato.properties and \
@@ -84,23 +90,27 @@ class Task:
 		else:
 			property = None
 		return str(property)
+
 	def getAttribute(self, key):
 		if key in self.attributes:
-			if hasattr(self.attributes[key],'islower'):
+			if hasattr(self.attributes[key],"islower"):
 				attribute = self.attributes[key]
-				expanded = re.sub(self.sweetpotato.regex, self.expand, attribute)
+				expanded = re.sub(self.sweetpotato.regex, 
+					self.expand, attribute)
 			else:
 				expanded = self.attributes[key]
 		else:
 			expanded = None
 		return expanded
+
 	def run(self):
 		if self.parent:
 			self.loadAdapter()
 		for task in self.tasks:
 			task.run()
-		if hasattr(self.adapter, 'run'):
+		if hasattr(self.adapter, "run"):
 			self.adapter.run()
+
 	def __str__(self):
 		task = self
 		typePath = deque([self.type])
@@ -108,15 +118,16 @@ class Task:
 			if task.parent.adapter:
 				typePath.appendleft(task.parent.type)
 			task = task.parent
-		strType = '.'.join(typePath)
+		strType = ".".join(typePath)
 		return strType
 
 class SweetPotato:
-	regex = re.compile('\{\{([^}]+)\}\}')
+	regex = re.compile("\{\{([^}]+)\}\}")
+
 	def __init__(self, options):
 		self.options = options
 		self.properties = {}
-		if hasattr(self.options, 'properties') and \
+		if hasattr(self.options, "properties") and \
 				self.options.properties:
 			for property in self.options.properties:
 				(key, value) = property.split("=")
@@ -124,17 +135,20 @@ class SweetPotato:
 			del self.options.properties
 		file = options.file
 		yamlData =  yaml.load(open(file))
-		self.buildData = yamlData['sweetpotato']
+		self.buildData = yamlData["sweetpotato"]
 		self.targets = {}
 		self.startTime = None
+
 	def setProperty(self, key, value):
 		self.properties[key.strip().lower()] = value
+
 	def getTarget(self, target):
 		if not self.targets.has_key(target):
 			self.targets[target] = \
-				Task(self, None, 'target', self.buildData[target])
+				Task(self, None, "target", self.buildData[target])
 			del self.buildData[target]
 		return self.targets[target]
+
 	def log(self, message, task=None):
 		from datetime import datetime
 		now = datetime.now()
@@ -142,11 +156,12 @@ class SweetPotato:
 			self.startTime = now
 		time = str(now.time())
 		if not task:
-			print '%s %s' % (time, message)
+			print "%s %s" % (time, message)
 		else:
-			print '%s %s\t%s' % (time, str(task).title(), message)
+			print "%s %s\t%s" % (time, str(task).title(), message)
+
 	def run(self,targetName):
-		self.log(':: %s' % targetName.upper())
+		self.log(":: %s" % targetName.upper())
 		target = self.getTarget(targetName)
 		target.run()
-		self.log('\n')
+		self.log("\n")

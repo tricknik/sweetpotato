@@ -1,3 +1,5 @@
+# example sweetpotato build script
+
 sweetpotato:
   build:
     - echo: hello world!
@@ -22,6 +24,11 @@ sweetpotato:
 
   echo:
     - echo: [1,2,3,4,5,6,7,8,9]
+
+  bad:
+    - echo:
+       value: [1, 2, 3]
+       echo: hello
 
   echoRow:
     - echo: '{{numberNumeral}} = {{numberName}}'
