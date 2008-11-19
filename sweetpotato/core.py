@@ -3,11 +3,11 @@ import yaml, re
 
 class Task:
 	def __init__(self, sweetpotato, parent, type, data):
+		self.adapter = None
 		self.tasks = deque()
 		self.attributes = {}
 		self.sweetpotato = sweetpotato
 		self.parent = parent
-		self.adapter = None
 		self.type = str(type)
 		self.read("value", data)
 
@@ -41,7 +41,12 @@ class Task:
 		while data:
 			value = data.pop()
 			if hasattr(value, "popitem"):	
-				self.addChildTask(value)
+				itemkey, itemdata = value.items()[0]
+				if hasattr(itemdata, 'append') \
+						and not hasattr(itemdata[0], 'pop'):
+					self.readList(itemdata, itemkey)
+				else:
+					self.addChildTask(value)
 			else:
 				self.setAttribute(attribute, value)
 
