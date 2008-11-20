@@ -5,29 +5,29 @@ class Task:
 	def __init__(self, sweetpotato, parent, type, data):
 		self.adapter = None
 		self.tasks = deque()
-		self.attributes = {}
+		self.properties = {}
 		self.sweetpotato = sweetpotato
 		self.parent = parent
 		self.type = str(type)
 		self.read("value", data)
 
-	def read(self, attribute, data):
+	def read(self, property, data):
 		if hasattr(data,"popitem"):
 			self.readDict(data)
 		elif hasattr(data,"pop"):
-			self.readList(data, attribute)
+			self.readList(data, property)
 		else:
-			self.setAttribute(attribute, data)
+			self.setProperty(property, data)
 
-	def setAttribute(self, attribute, value):
-		if self.attributes.has_key(attribute):
-			if hasattr(self.attributes[attribute],"appendleft"):
-				self.attributes[attribute].appendleft(value)
+	def setProperty(self, property, value):
+		if self.properties.has_key(property):
+			if hasattr(self.properties[property],"appendleft"):
+				self.properties[property].appendleft(value)
 			else:
-				value = deque([value, self.attributes[attribute]])
-				self.attributes[attribute] = value
+				value = deque([value, self.properties[property]])
+				self.properties[property] = value
 		else:
-			self.attributes[attribute] = value
+			self.properties[property] = value
 
 	def readDict(self, data):
 		while data:
@@ -35,9 +35,9 @@ class Task:
 			if hasattr(value, "pop"):
 				self.readList([{key:value}])
 			else:
-				self.setAttribute(key, value)
+				self.setProperty(key, value)
 
-	def readList(self, data, attribute="value"):
+	def readList(self, data, property="value"):
 		while data:
 			value = data.pop()
 			if hasattr(value, "popitem"):	
@@ -48,9 +48,9 @@ class Task:
 				else:
 					self.addChildTask(value)
 			else:
-				self.setAttribute(attribute, value)
+				self.setProperty(property, value)
 
-	def addChildTask(self, value, attribute="value"):
+	def addChildTask(self, value, property="value"):
 		if hasattr(value, "popitem"):	
 			itemkey, itemvalue = value.popitem()
 			child = Task(self.sweetpotato, self, itemkey, itemvalue)
@@ -98,14 +98,14 @@ class Task:
 			token = None
 		return str(token)
 
-	def getAttribute(self, key):
-		if key in self.attributes:
-			if hasattr(self.attributes[key],"islower"):
-				attribute = self.attributes[key]
+	def getProperty(self, key):
+		if key in self.properties:
+			if hasattr(self.properties[key],"islower"):
+				property = self.properties[key]
 				expanded = re.sub(self.sweetpotato.regex, 
-					self.expand, attribute)
+					self.expand, property)
 			else:
-				expanded = self.attributes[key]
+				expanded = self.properties[key]
 		else:
 			expanded = None
 		return expanded
@@ -142,10 +142,13 @@ class SweetPotato:
 				self.setToken(key, value.strip())
 			del self.options.tokens
 		file = options.file
-		yamlData =  yaml.load(open(file))
-		self.buildData = yamlData["sweetpotato"]
+		self.load(file)
 		self.targets = {}
 		self.startTime = None
+
+	def load(self, buildfile):
+		yamlData =  yaml.load(open(buildfile))
+		self.buildData = yamlData["sweetpotato"]
 
 	def setToken(self, key, value):
 		self.tokens[key.strip().lower()] = value

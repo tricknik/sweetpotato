@@ -10,12 +10,12 @@ class db(TaskAdapter):
 
 		def run(self):
 			parent = self.task.getParent()
-			type = parent.attributes["type"]
+			type = parent.properties["type"]
 			sweetpotato = self.task.sweetpotato				
 			for row in db.types[type](self.task):
 				self.setProperties(row)
-				if "target" in self.task.attributes:
-					target = self.task.attributes["target"]
+				if "target" in self.task.properties:
+					target = self.task.properties["target"]
 					sweetpotato.run(target)
 
 		def setProperties(self, row):
@@ -30,17 +30,17 @@ class db(TaskAdapter):
 			def run(self):
 				parent = self.task.getParent()
 				fieldlist = parent.adapter.fieldlist
-				attributes = self.task.attributes
-				for field in attributes:
-					fieldlist.append({field: attributes[field]})
+				properties = self.task.properties
+				for field in properties:
+					fieldlist.append({field: properties[field]})
 
 def dbSweetpotato(task):
 		import yaml
 		parent = task.getParent()
-		path = parent.attributes["path"]
+		path = parent.properties["path"]
 		task.log("from %s" % path)
 		data = yaml.load(open(path))
-		for row in data[task.attributes["root"]]:
+		for row in data[task.properties["root"]]:
 			yield row
 
 db.types["sweetpotato"] = dbSweetpotato

@@ -10,7 +10,7 @@ def main():
 	parser.add_option("-l","--list", action="store_true", help="list targets")
 	parser.add_option("-L","--list-all", action="store_true", help="list all targets")
 	parser.add_option("-f","--file",default="build.yaml", help="build file [default: %default]")
-	parser.add_option("-S",dest="tokens", metavar="TOKEN=VALUE", action="append", help="set build token")
+	parser.add_option("-T",dest="tokens", metavar="TOKEN=VALUE", action="append", help="set build token")
 
 	(options, args) = parser.parse_args()
 	if 1 > len(args):
