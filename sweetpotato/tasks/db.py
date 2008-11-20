@@ -13,12 +13,12 @@ class db(TaskAdapter):
 			type = parent.properties["type"]
 			sweetpotato = self.task.sweetpotato				
 			for row in db.types[type](self.task):
-				self.setProperties(row)
+				self.setTokens(row)
 				if "target" in self.task.properties:
 					target = self.task.properties["target"]
 					sweetpotato.run(target)
 
-		def setProperties(self, row):
+		def setTokens(self, row):
 			sweetpotato = self.task.sweetpotato				
 			for field in self.fieldlist:
 				if field:

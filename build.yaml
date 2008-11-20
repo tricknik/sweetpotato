@@ -19,10 +19,11 @@ sweetpotato:
 
   setRange:
     - echo: setting range
-    - set: {'name':range,'value':100}
+    - token: {'name':range,'value':100}
 
   range:
     - require: setRange
+    - echo: 'rage is {{range}}'
     - run: {'target':build, 'range':'{{range}}'}
 
   echo:

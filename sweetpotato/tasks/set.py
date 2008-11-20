@@ -2,5 +2,6 @@ from adapter import TaskAdapter
 
 class set(TaskAdapter):
 	def run(self):
-		properties = self.task.sweetpotato.properties
-		properties[self.task.attributes.name] = self.task.attributes.value
+		name = self.task.getProperty('name')
+		value = self.task.getProperty('value')
+		self.task.setProperty(name, value)
