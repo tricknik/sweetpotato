@@ -21,7 +21,7 @@ sweetpotato:
     - property: {'name':range,'value':100}
 
   range:
-    - include: setRange
+    - require: setRange
     - run: {'target':build, 'range':'{{range}}'}
 
   echo:

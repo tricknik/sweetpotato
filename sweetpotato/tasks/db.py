@@ -22,9 +22,9 @@ class db(TaskAdapter):
 			sweetpotato = self.task.sweetpotato				
 			for field in self.fieldlist:
 				if field:
-					(name, property) = field.items()[0]
+					(name, token) = field.items()[0]
 					if name in row:
-						sweetpotato.setProperty(property, row[name])
+						sweetpotato.setToken(token, row[name])
 
 		class fields(TaskAdapter):
 			def run(self):

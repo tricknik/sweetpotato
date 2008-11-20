@@ -92,12 +92,11 @@ class Task:
 
 	def expand(self, value):
 		key = value.groups()[0].strip().lower()
-		if self.sweetpotato.properties and \
-				key in self.sweetpotato.properties:
-			property = self.sweetpotato.properties[key]	
+		if key in self.sweetpotato.tokens:
+			token = self.sweetpotato.tokens[key]	
 		else:
-			property = None
-		return str(property)
+			token = None
+		return str(token)
 
 	def getAttribute(self, key):
 		if key in self.attributes:
@@ -135,21 +134,21 @@ class SweetPotato:
 
 	def __init__(self, options):
 		self.options = options
-		self.properties = {}
-		if hasattr(self.options, "properties") and \
-				self.options.properties:
-			for property in self.options.properties:
-				(key, value) = property.split("=")
-				self.setProperty(key, value.strip())
-			del self.options.properties
+		self.tokens = {}
+		if hasattr(self.options, "tokens") and \
+				self.options.tokens:
+			for token in self.options.tokens:
+				(key, value) = token.split("=")
+				self.setToken(key, value.strip())
+			del self.options.tokens
 		file = options.file
 		yamlData =  yaml.load(open(file))
 		self.buildData = yamlData["sweetpotato"]
 		self.targets = {}
 		self.startTime = None
 
-	def setProperty(self, key, value):
-		self.properties[key.strip().lower()] = value
+	def setToken(self, key, value):
+		self.tokens[key.strip().lower()] = value
 
 	def getTarget(self, target):
 		if not self.targets.has_key(target):
