@@ -171,6 +171,11 @@ class SweetPotato:
 		else:
 			print "%s %s\t%s" % (time, str(task).title(), message)
 
+	def require(self, target):
+		if not target in self.targets:
+			target = self.getTarget(target)
+			target.run()
+
 	def run(self,targetName):
 		self.log(":: %s" % targetName.upper())
 		target = self.getTarget(targetName)

@@ -18,7 +18,8 @@ sweetpotato:
     - echo: done!
 
   setRange:
-    - property: {'name':range,'value':100}
+    - echo: setting range
+    - set: {'name':range,'value':100}
 
   range:
     - require: setRange
