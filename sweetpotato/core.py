@@ -22,9 +22,9 @@ class Task:
 	def setProperty(self, property, value):
 		if self.properties.has_key(property):
 			if hasattr(self.properties[property],"appendleft"):
-				self.properties[property].appendleft(value)
+				self.properties[property].append(value)
 			else:
-				value = deque([value, self.properties[property]])
+				value = deque((self.properties[property], value))
 				self.properties[property] = value
 		else:
 			self.properties[property] = value
@@ -98,16 +98,27 @@ class Task:
 			token = None
 		return str(token)
 
+	def expandValue(self, value):
+		expanded = value
+		if hasattr(value,'islower'):
+			expanded = re.sub(self.sweetpotato.regex, self.expand, value)
+		return expanded
+
 	def getProperty(self, key):
 		if key in self.properties:
 			if hasattr(self.properties[key],"islower"):
 				property = self.properties[key]
-				expanded = re.sub(self.sweetpotato.regex, 
-					self.expand, property)
+				expanded = self.expandValue(property)
+			elif hasattr(self.properties[key],"append"):
+				expanded = deque()
+				for item in  self.properties[key]:
+					expandedItem = self.expandValue(item)
+					if expandedItem:
+						expanded.appendleft(expandedItem)
 			else:
 				expanded = self.properties[key]
 		else:
-			expanded = None
+			expanded = ''
 		return expanded
 
 	def run(self):
@@ -169,15 +180,17 @@ class SweetPotato:
 		if not task:
 			print "%s %s" % (time, message)
 		else:
-			print "%s %s\t%s" % (time, str(task).title(), message)
+			print "%s    %s\t%s" % (time, str(task).title(), message)
 
 	def require(self, targetName):
 		if not targetName in self.targets:
 			target = self.getTarget(targetName)
 			self.log(":: %s" % targetName.upper())
 			target.run()
+			self.log(" ^")
 
 	def run(self,targetName):
 		self.log("~{ %s " % targetName.upper())
 		target = self.getTarget(targetName)
 		target.run()
+		self.log("--")

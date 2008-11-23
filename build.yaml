@@ -19,19 +19,32 @@ sweetpotato:
 
   setRange:
     - echo: setting range
-    - token: {'name':range,'value':100}
+    - token: 
+        start: 10
+        step: 2
+        stop: 40 
 
   range:
     - require: setRange
-    - echo: 'rage is {{range}}'
-    - run: {'target':build, 'range':'{{range}}'}
+    - echo: 'start is {{start}}'
+    - echo: 'stop is {{stop}}'
+    - echo: 'step is {{step}}'
+    - do: {'target':build, 'range':['{{start}}','{{stop}}']}
+
+  range2:
+    - do: {'target':iterate, 'settoken': iteration, 'range':'{{stop}}'}
+
+  iterate:
+    - echo: 'Iteration {{iteration}}'
+    - do: build 
 
   echo:
-    - echo: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - echo: echo
+    - echo: {'value':[1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
   bad:
-    run: {'echo': test}
-    echo:
+    - do: {'target': iterate, 'settoken':iteration, 'list': [aha, abba, abc]}
+    - echo:
        value: [1, 2, 3]
        echo: hello
 
