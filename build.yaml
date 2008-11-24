@@ -5,7 +5,7 @@ sweetpotato:
     - example:
         - echo: this is an example target
         - require: settokens
-        - echo: sweetpotato will count from 0 to {{countto}} -1
+        - echo: 'sweetpotato will count from 0 to {{countto}} -1'
         - do: {'target': echocount, 'range':'{{countto}}', 'settoken':iteration}
         - echo: sweetpotato makes counting easy!
         - db:
@@ -25,10 +25,10 @@ sweetpotato:
             countto: 5
 
     - echocount:
-        - echo: {{iteration}}
+        - echo: '{{iteration}}'
 
     - echomood:
-        - echo: {{personName}} is feeling {{personMood}}
+        - echo: '{{personName}} is feeling {{personMood}}'
 
 somedata:
  - {'name':bob,'mood':happy}
