@@ -60,12 +60,10 @@ class Task:
 		else:
 			raise Exception, "Task must be {key: value}"
 
-	def getParent(self):
+	def getParent(self, parentType):
 		parent = self.parent
-		if hasattr(parent, "adapter") and \
-				hasattr(parent.adapter, "inherit"):
-			while parent.adapter and parent.adapter.inherit:
-				parent = parent.adapter.task.parent
+		while parentType != parent.type:
+			parent = parent.parent
 		return parent
 
 	def loadAdapter(self):
@@ -133,7 +131,7 @@ class Task:
 		task = self
 		typePath = deque([self.type])
 		while task and task.parent:
-			task = task.getParent()
+			task = task.parent
 			if task.adapter:
 				typePath.appendleft(task.type)
 			task = task.parent

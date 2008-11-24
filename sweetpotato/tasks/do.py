@@ -1,7 +1,6 @@
 from adapter import TaskAdapter
 
 class do(TaskAdapter):
-	inherit = True
 	def run(self):
 		target = self.task.getProperty('target')
 		if not target:
