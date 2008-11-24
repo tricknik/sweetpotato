@@ -1,60 +1,44 @@
 # example sweetpotato build script
 
+
 sweetpotato:
-  build:
-    - echo: hello world!
-    - db: 
-        type: sweetpotato
-        path: build.yaml
-        do:
-          - read: 
-              root: numbers
-              target: echoRow
-              do:
-                - echo: {'value': reading}
-                - fields: 
-                    id: numberNumeral
-                    name: numberName
-    - echo: done!
+    - example:
+        - echo: this is an example target
+        - require: settokens
+        - echo: sweetpotato will count from 0 to {{countto}} -1
+        - do: {'target': echocount, 'range':{{countto}}, 'settoken':iteration}
+        - echo: sweetpotato makes counting easy!
+        - db:
+            type: sweetpotato
+            path: build.yaml
+            read:
+                root: somedata
+                target: echomood
+                do:
+                    - echo: I am a nested echo task nested in-line inside a do task!
+                    - fields:
+                        name: personName
+                        mood: personMood
 
-  setRange:
-    - echo: setting range
-    - token: 
-        start: 10
-        step: 2
-        stop: 40 
+    - settokens:
+        - token:
+            countto: 5
 
-  range:
-    - require: setRange
-    - echo: 'start is {{start}}'
-    - echo: 'stop is {{stop}}'
-    - echo: 'step is {{step}}'
-    - do: {'target':build, 'range':['{{start}}','{{stop}}']}
+    - echocount:
+        - echo: {{iteration}}
 
-  range2:
-    - do: {'target':iterate, 'settoken': iteration, 'range':'{{stop}}'}
+    - echomood:
+        - echo: {{personName}} is feeling {{personMood}}
 
-  iterate:
-    - echo: 'Iteration {{iteration}}'
-    - do: build 
+somedata:
+ - {'name':bob,'mood':happy}
+ - {'name':ann,'mood':silly}
+ - {'name':joe,'mood':sleepy}
+ - {'name':tom,'mood':angry}
+ - {'name':sue,'mood':mopey}
+ - {'name':tim,'mood':curious}
+ - {'name':ken,'mood':amorous}
+ - {'name':don,'mood':coy}
+ - {'name':mel,'mood':scared}
 
-  echo:
-    - echo: echo
-    - echo: {'value':[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-
-  bad:
-    - do: {'target': iterate, 'settoken':iteration, 'list': [aha, abba, abc]}
-    - echo:
-       value: [1, 2, 3]
-       echo: hello
-
-  echoRow:
-    - echo: '{{numberNumeral}} = {{numberName}}'
-
-numbers: 
-  - {'id':1,'name':one}
-  - {'id':2,'name':two}
-  - {'id':3,'name':three}
-  - {'id':4,'name':four}
-  - {'id':5,'name':five}
 
