@@ -6,7 +6,7 @@ sweetpotato:
         - echo: this is an example target
         - require: settokens
         - echo: sweetpotato will count from 0 to {{countto}} -1
-        - do: {'target': echocount, 'range':{{countto}}, 'settoken':iteration}
+        - do: {'target': echocount, 'range':'{{countto}}', 'settoken':iteration}
         - echo: sweetpotato makes counting easy!
         - db:
             type: sweetpotato
