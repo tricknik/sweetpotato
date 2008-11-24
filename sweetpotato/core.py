@@ -150,12 +150,22 @@ class SweetPotato:
 				(key, value) = token.split("=")
 				self.setToken(key, value.strip())
 			del self.options.tokens
+		logLevel = logging.INFO
+		if hasattr(self.options, "log_level"):
+			if "error" == self.options.log_level:
+				logLevel = logging.ERROR
+			elif "warning" == self.options.log_level:
+				logLevel = logging.WARNING
+			elif "info" == self.options.log_level:
+				logLevel = logging.INFO
+			elif "debug" == self.options.log_level:
+				logLevel = logging.DEBUG
 		file = options.file
 		self.load(file)
 		self.targets = {}
 		self.startTime = None
 		self.loggers = {}
-		logging.basicConfig(level=logging.INFO,
+		logging.basicConfig(level=logLevel,
 			format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
 			datefmt='%m-%d %H:%M')
 
