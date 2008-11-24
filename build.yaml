@@ -1,42 +1,43 @@
 # example sweetpotato build script
 
 sweetpotato:
-    - example:
-        - echo: this is an example target
-        - require: settokens
-        - echo: 'sweetpotato will count from 0 to {{countto}} -1'
-        - do: {'target': echocount, 'range':'{{countto}}', 'settoken':iteration}
-        - echo: sweetpotato makes counting easy!
-        - db:
-            type: sweetpotato
-            path: build.yaml
-            read:
-                root: somedata
-                target: echomood
-                do:
-                    - echo: I am a nested echo task nested in-line inside a do task!
-                    - fields:
-                        name: personName
-                        mood: personMood
+    example:
+      - echo: this is an example target
+      - require: settokens
+      - echo: tokens are go
+      - echo: 'sweetpotato will count from 0 to {{countto}} -1'
+      - do: {'target': echocount, 'range':'{{countto}}', 'settoken':iteration}
+      - echo: sweetpotato makes counting easy!
+      - db:
+          type: sweetpotato
+          path: build.yaml
+          read:
+              root: somedata
+              target: echomood
+              do:
+                  - echo: I am a nested echo task nested in-line inside a do task!
+                  - fields:
+                      name: personName
+                      mood: personMood
 
-    - settokens:
-        - token:
-            countto: 5
+    settokens:
+      - token:
+          countto: 5
 
-    - echocount:
-        - echo: '{{iteration}}'
+    echocount:
+      - echo: '{{iteration}}'
 
-    - echomood:
-        - echo: '{{personName}} is feeling {{personMood}}'
+    echomood:
+      - echo: '{{personName}} is feeling {{personMood}}'
 
 somedata:
- - {'name':bob,'mood':happy}
- - {'name':ann,'mood':silly}
- - {'name':joe,'mood':sleepy}
- - {'name':tom,'mood':angry}
- - {'name':sue,'mood':mopey}
- - {'name':tim,'mood':curious}
- - {'name':ken,'mood':amorous}
- - {'name':don,'mood':coy}
- - {'name':mel,'mood':scared}
+    - {'name':bob,'mood':happy}
+    - {'name':ann,'mood':silly}
+    - {'name':joe,'mood':sleepy}
+    - {'name':tom,'mood':angry}
+    - {'name':sue,'mood':mopey}
+    - {'name':tim,'mood':curious}
+    - {'name':ken,'mood':amorous}
+    - {'name':don,'mood':coy}
+    - {'name':mel,'mood':scared}
 

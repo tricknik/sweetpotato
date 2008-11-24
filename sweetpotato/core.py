@@ -1,5 +1,5 @@
 from collections import deque
-import yaml, re
+import yaml, re, logging
 
 class Task:
 	def __init__(self, sweetpotato, parent, type, data):
@@ -154,6 +154,10 @@ class SweetPotato:
 		self.load(file)
 		self.targets = {}
 		self.startTime = None
+		self.loggers = {}
+		logging.basicConfig(level=logging.INFO,
+			format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+			datefmt='%m-%d %H:%M')
 
 	def load(self, buildfile):
 		yamlData =  yaml.load(open(buildfile))
@@ -169,26 +173,22 @@ class SweetPotato:
 			del self.buildData[target]
 		return self.targets[target]
 
-	def log(self, message, task=None):
-		from datetime import datetime
-		now = datetime.now()
-		if not self.startTime:
-			self.startTime = now
-		time = str(now.time())
-		if not task:
-			print "%s %s" % (time, message)
-		else:
-			print "%s    %s\t%s" % (time, str(task).title(), message)
-
+	def log(self, message, task=None, level=logging.INFO):
+		loggerKey = 'sweetpotato'	
+		if hasattr(task,'type'):
+			loggerKey = task.type
+		if not loggerKey in self.loggers:
+			self.loggers[loggerKey] = logging.getLogger(loggerKey)
+		self.loggers[loggerKey].log(level, message)
 	def require(self, targetName):
 		if not targetName in self.targets:
 			target = self.getTarget(targetName)
-			self.log(":: %s" % targetName.upper())
+			self.log("LOADING %s" % targetName.upper(), level=logging.DEBUG)
 			target.run()
-			self.log(" ^")
+			self.log("%s LOADED" % targetName.upper(), level=logging.DEBUG)
 
 	def run(self,targetName):
-		self.log("~{ %s " % targetName.upper())
+		self.log("STARTING %s " % targetName.upper(), level=logging.DEBUG)
 		target = self.getTarget(targetName)
 		target.run()
-		self.log("--")
+		self.log("%s ENDED" % targetName.upper(), level=logging.DEBUG)
