@@ -1,6 +1,5 @@
 # example sweetpotato build script
 
-
 sweetpotato:
     - example:
         - echo: this is an example target
@@ -40,5 +39,4 @@ somedata:
  - {'name':ken,'mood':amorous}
  - {'name':don,'mood':coy}
  - {'name':mel,'mood':scared}
-
 
