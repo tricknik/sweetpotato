@@ -1,14 +1,17 @@
 from collections import deque
+from tasks.adapter import TaskAdapter
 import yaml, re, logging
 
 class Task:
+	taskId = 0
 	def __init__(self, sweetpotato, parent, type, data):
-		self.adapter = None
+		self.taskId = self.taskId + 1
 		self.tasks = deque()
 		self.properties = {}
 		self.sweetpotato = sweetpotato
 		self.parent = parent
 		self.type = str(type)
+		self.adapter = TaskAdapter(self)
 		self.read("value", data)
 
 	def read(self, property, data):
@@ -122,10 +125,7 @@ class Task:
 	def run(self):
 		if self.parent:
 			self.loadAdapter()
-		for task in self.tasks:
-			task.run()
-		if hasattr(self.adapter, "run"):
-			self.adapter.run()
+		self.adapter.runChildTasks()
 
 	def __str__(self):
 		task = self

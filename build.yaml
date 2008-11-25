@@ -16,9 +16,11 @@ sweetpotato:
               target: echomood
               do:
                   - echo: I am a nested echo task nested in-line inside a do task!
-                  - fields:
-                      name: personName
-                      mood: personMood
+                  - lock:
+                      - echo: this part has mutex
+                      - fields:
+                          name: personName
+                          mood: personMood
 
     settokens:
       - token:
