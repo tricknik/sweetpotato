@@ -15,7 +15,7 @@ class do(TaskAdapter):
 			for arg in prange:
 				args.append(int(arg))
 			list = range(*args)	
-		elif prange and prange.isdigit():
+		elif prange and str(prange).isdigit():
 			list = range(int(prange))
 		else:
 			list = self.task.getProperty('list')

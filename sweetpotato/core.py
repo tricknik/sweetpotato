@@ -13,6 +13,7 @@ class Task:
         self.parent = parent
         self.type = str(type)
         self.adapter = TaskAdapter(self)
+        self.log("creating task %s with type %s" % (self.taskId, self.type), logging.DEBUG)
         self.read("value", data)
 
     def read(self, property, data):
@@ -167,7 +168,7 @@ class SweetPotato:
         self.startTime = None
         self.loggers = {}
         logging.basicConfig(level=logLevel,
-            format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
+            format='%(asctime)s %(name)-12s %(levelname)-5s %(message)s',
             datefmt='%m-%d %H:%M')
 
     def load(self, buildfile):
@@ -187,7 +188,7 @@ class SweetPotato:
     def log(self, message, task=None, level=logging.INFO):
         loggerKey = 'sweetpotato'    
         if hasattr(task,'type'):
-            loggerKey = "task %s (%s)" % (task.taskId, task.type)
+            loggerKey = "%s:%s" % (task.type, task.taskId)
         if not loggerKey in self.loggers:
             self.loggers[loggerKey] = logging.getLogger(loggerKey)
         self.loggers[loggerKey].log(level, message)

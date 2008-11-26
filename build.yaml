@@ -16,21 +16,36 @@ sweetpotato:
               target: echomood
               do:
                   - echo: I am a nested echo task nested in-line inside a do task!
-                  - lock:
-                      - echo: this part has mutex
-                      - fields:
-                          name: personName
-                          mood: personMood
+                  - echo: this part has mutex
+                  - fields:
+                      name: personName
+                      mood: personMood
 
     settokens:
-      - token:
-          countto: 5
+        - token:
+            countto: 5
 
     echocount:
-      - echo: '{{iteration}}'
+        - echo: '{{iteration}}'
 
     echomood:
-      - echo: '{{personName}} is feeling {{personMood}}'
+        - echo: '{{personName}} is feeling {{personMood}}'
+
+    longrun: 
+        - lock: 
+            key: locktest
+            do:
+                - do: {'target': donothing, 'range': 1000, 'settoken':iteration}
+                - echo: done longrun 
+    longerrun: 
+        - lock: 
+            key: locktest
+            do:
+                - do: {'target': donothing, 'range': 100000, 'settoken':iteration}
+                - echo: done longerrun 
+    sayhello:
+        - echo: why, hello there!
+    donothing:
 
 somedata:
     - {'name':bob,'mood':happy}
