@@ -31,6 +31,12 @@ sweetpotato:
     echomood:
         - echo: '{{personName}} is feeling {{personMood}}'
 
+#'''''''''''''''''''''''''''''''
+#  = targets for lock tests =
+#  i.e. `sp longerrun & sleep 3; sp sayhello; sp longrun`
+#  in the above example sayhello should finish first, then longerrun, then longrun
+#...
+
     longrun: 
         - lock: 
             key: locktest
@@ -45,6 +51,7 @@ sweetpotato:
                 - echo: done longerrun 
     sayhello:
         - echo: why, hello there!
+
     donothing:
 
 somedata:
