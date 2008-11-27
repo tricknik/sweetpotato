@@ -9,7 +9,7 @@ class db(TaskAdapter):
 			TaskAdapter.__init__(self, task)
 
 		def run(self):
-			parent = self.task.getParent('db')
+			parent = self.task.getParent("db")
 			type = parent.properties["type"]
 			sweetpotato = self.task.sweetpotato				
 			for row in db.types[type](self.task):
@@ -28,7 +28,7 @@ class db(TaskAdapter):
 
 		class fields(TaskAdapter):
 			def run(self):
-				parent = self.task.getParent('read')
+				parent = self.task.getParent("read")
 				fieldlist = parent.adapter.fieldlist
 				properties = self.task.properties
 				for field in properties:
@@ -36,7 +36,7 @@ class db(TaskAdapter):
 
 def dbSweetpotato(task):
 		import yaml
-		parent = task.getParent('db')
+		parent = task.getParent("db")
 		path = parent.properties["path"]
 		task.log("from %s" % path)
 		data = yaml.load(open(path))

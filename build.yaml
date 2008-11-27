@@ -1,12 +1,14 @@
-# example sweetpotato build script
+#""""""""""""""""""""""""""""""
+#  = example sweetpotato build script =
+#...
 
 sweetpotato:
     example:
       - echo: this is an example target
       - require: settokens
       - echo: tokens are go
-      - echo: 'sweetpotato will count from 0 to {{countto}} -1'
-      - do: {'target': echocount, 'range':'{{countto}}', 'settoken':iteration}
+      - echo: "sweetpotato will count from 0 to {{countto}} -1"
+      - do: {"target": echocount, "range":"{{countto}}", "settoken":iteration}
       - echo: sweetpotato makes counting easy!
       - db:
           type: sweetpotato
@@ -26,12 +28,12 @@ sweetpotato:
             countto: 5
 
     echocount:
-        - echo: '{{iteration}}'
+        - echo: "{{iteration}}"
 
     echomood:
-        - echo: '{{personName}} is feeling {{personMood}}'
+        - echo: "{{personName}} is feeling {{personMood}}"
 
-#'''''''''''''''''''''''''''''''
+#"""""""""""""""""""""""""""""""
 #  = targets for lock tests =
 #  i.e. `sp longerrun & sleep 3; sp sayhello; sp longrun`
 #  in the above example sayhello should finish first, then longerrun, then longrun
@@ -41,27 +43,44 @@ sweetpotato:
         - lock: 
             key: locktest
             do:
-                - do: {'target': donothing, 'range': 1000, 'settoken':iteration}
+                - do: {"target": donothing, "range": 1000, "settoken":iteration}
                 - echo: done longrun 
     longerrun: 
         - lock: 
             key: locktest
             do:
-                - do: {'target': donothing, 'range': 100000, 'settoken':iteration}
+                - do: {"target": donothing, "range": 100000, "settoken":iteration}
                 - echo: done longerrun 
     sayhello:
         - echo: why, hello there!
 
     donothing:
 
+#""""""""""""""""""""""""""""""
+#  = targets for workfile tests =
+#...
+
+    buildsh:
+        workfile:
+            path: my.sh
+            backup: save
+            lock:
+                - write: "#/!bin/sh"
+                - write: echo "hello world!" 
+
+
+#""""""""""""""""""""""""""""""
+#  = Inline Data =
+#...
+
 somedata:
-    - {'name':bob,'mood':happy}
-    - {'name':ann,'mood':silly}
-    - {'name':joe,'mood':sleepy}
-    - {'name':tom,'mood':angry}
-    - {'name':sue,'mood':mopey}
-    - {'name':tim,'mood':curious}
-    - {'name':ken,'mood':amorous}
-    - {'name':don,'mood':coy}
-    - {'name':mel,'mood':scared}
+    - {"name":bob, "mood":happy}
+    - {"name":ann, "mood":silly}
+    - {"name":joe, "mood":sleepy}
+    - {"name":tom, "mood":angry}
+    - {"name":sue, "mood":mopey}
+    - {"name":tim, "mood":curious}
+    - {"name":ken, "mood":amorous}
+    - {"name":don, "mood":coy}
+    - {"name":mel, "mood":scared}
 
