@@ -1,46 +1,51 @@
+""" database interface module
+"""
 from adapter import TaskAdapter
 
 class db(TaskAdapter):
-	types = {}
+    """ database interface module
+        defines a connection to a data source  
+    """
 
-	class read(TaskAdapter):
-		def __init__(self, task):
-			self.fieldlist = []
-			TaskAdapter.__init__(self, task)
+    types = {}
+    class read(TaskAdapter):
+        def __init__(self, task):
+            self.fieldlist = []
+            TaskAdapter.__init__(self, task)
 
-		def run(self):
-			parent = self.task.getParent("db")
-			type = parent.properties["type"]
-			sweetpotato = self.task.sweetpotato				
-			for row in db.types[type](self.task):
-				self.setTokens(row)
-				if "target" in self.task.properties:
-					target = self.task.properties["target"]
-					sweetpotato.run(target)
+        def run(self):
+            parent = self.task.getParent("db")
+            type = parent.properties["type"]
+            sweetpotato = self.task.sweetpotato                
+            for row in db.types[type](self.task):
+                self.setTokens(row)
+                if "target" in self.task.properties:
+                    target = self.task.properties["target"]
+                    sweetpotato.run(target)
 
-		def setTokens(self, row):
-			sweetpotato = self.task.sweetpotato				
-			for field in self.fieldlist:
-				if field:
-					(name, token) = field.items()[0]
-					if name in row:
-						sweetpotato.setToken(token, row[name])
+        def setTokens(self, row):
+            sweetpotato = self.task.sweetpotato                
+            for field in self.fieldlist:
+                if field:
+                    (name, token) = field.items()[0]
+                    if name in row:
+                        sweetpotato.setToken(token, row[name])
 
-		class fields(TaskAdapter):
-			def run(self):
-				parent = self.task.getParent("read")
-				fieldlist = parent.adapter.fieldlist
-				properties = self.task.properties
-				for field in properties:
-					fieldlist.append({field: properties[field]})
+        class fields(TaskAdapter):
+            def run(self):
+                parent = self.task.getParent("read")
+                fieldlist = parent.adapter.fieldlist
+                properties = self.task.properties
+                for field in properties:
+                    fieldlist.append({field: properties[field]})
 
 def dbSweetpotato(task):
-		import yaml
-		parent = task.getParent("db")
-		path = parent.properties["path"]
-		task.log("from %s" % path)
-		data = yaml.load(open(path))
-		for row in data[task.properties["root"]]:
-			yield row
+        import yaml
+        parent = task.getParent("db")
+        path = parent.properties["path"]
+        task.log("from %s" % path)
+        data = yaml.load(open(path))
+        for row in data[task.properties["root"]]:
+            yield row
 
 db.types["sweetpotato"] = dbSweetpotato

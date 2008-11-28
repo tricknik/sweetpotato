@@ -84,11 +84,20 @@ class Task:
 
     def importModule(self, type):
         from copy import copy
-        fromList = ["sweetpotato","tasks"]
-        nameList = copy(fromList)
-        nameList.append(type)
-        taskModule = ".".join(nameList)
-        return __import__(taskModule, fromlist=fromList)
+        module = None
+        for name in self.sweetpotato.modules:
+            fromList = self.sweetpotato.modules[name]
+            nameList = copy(fromList)
+            nameList.append(type)
+            taskModule = ".".join(nameList)
+            try:
+                module =  __import__(taskModule, fromlist=fromList)
+                self.log("%s loaded from %s" % (type, name), logging.DEBUG)
+            except ImportError:
+                self.log("%s not in %s" % (type, name), logging.DEBUG)
+        if not module:
+            raise Exception, "Unable to load %s" % type
+        return module
 
     def log(self, message, level=logging.INFO):
         self.sweetpotato.log(message, self, level)
@@ -144,6 +153,7 @@ class SweetPotato:
     regex = re.compile("\{\{([^}]+)\}\}")
 
     def __init__(self, options):
+        self.modules = {"core": ["sweetpotato", "tasks"]}
         self.options = options
         self.tokens = {}
         if hasattr(self.options, "tokens") and \
@@ -170,6 +180,9 @@ class SweetPotato:
         logging.basicConfig(level=logLevel,
             format='%(asctime)s %(name)-12s %(levelname)-5s %(message)s',
             datefmt='%m-%d %H:%M')
+
+    def loadExtension(self, name, fromList):
+        self.modules[name] = fromList
 
     def load(self, buildfile):
         yamlData =  yaml.load(open(buildfile))

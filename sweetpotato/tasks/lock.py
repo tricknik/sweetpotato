@@ -1,7 +1,12 @@
+""" provide mutex to subtasks with lock file
+"""
 from adapter import TaskAdapter
 import logging, fcntl, os
 
 class lock(TaskAdapter):
+    """ provide mutex to subtasks with lock file
+    """
+
     locks = {}
     def getLock(self):
         return lock.locks[self.key]

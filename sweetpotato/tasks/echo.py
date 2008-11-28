@@ -1,5 +1,8 @@
 from adapter import TaskAdapter
-
+""" out to standard logger
+"""
 class echo(TaskAdapter):
-	def run(self):
-		self.task.log(self.task.getProperty('value'))
+    """ out to standard logger
+    """
+    def run(self):
+        self.task.log(self.task.getProperty('value'))

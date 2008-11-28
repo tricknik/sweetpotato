@@ -1,7 +1,11 @@
+""" run a target only if it has not been run before
+"""
+
 from adapter import TaskAdapter
 
 class require(TaskAdapter):
-	inherit = True
-	def run(self):
-		target = self.task.getProperty('value')
-		self.task.sweetpotato.require(target)
+    """ run a target only if it has not been run before
+    """
+    def run(self):
+        target = self.task.getProperty('value')
+        self.task.sweetpotato.require(target)

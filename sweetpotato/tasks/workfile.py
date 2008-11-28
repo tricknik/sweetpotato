@@ -1,9 +1,12 @@
+""" sweetpotato module for workfile task adapter
+"""
+
 from adapter import TaskAdapter
 import os, logging
 
 
 class workfile(TaskAdapter):
-    """ sweetpotato module for manipulating files
+    """ sweetpotato task adapter for manipulating files
     """
 
     def runChildTasks(self):
@@ -38,6 +41,9 @@ class workfile(TaskAdapter):
                 self.file = open(self.path, mode)
         if update:
             TaskAdapter.runChildTasks(self)
+
+    def run(self):
+        self.file.close()
 
     class write(TaskAdapter):
         """ write data to working file
