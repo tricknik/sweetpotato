@@ -75,7 +75,7 @@ sweetpotato:
     loadtest:
         - extension: 
             name: xhtml
-            from: [sweetpotato,extensions]
+            from: [sweetpotato,extensions,xhtml]
         - lock:
             - workfile:
                 path: my.html
