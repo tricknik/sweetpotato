@@ -1,6 +1,6 @@
 """ provide mutex to subtasks with lock file
 """
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 import logging, fcntl, os
 
 class lock(TaskAdapter):

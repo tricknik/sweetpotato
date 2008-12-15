@@ -68,6 +68,41 @@ sweetpotato:
                 - write: "#/!bin/sh"
                 - write: echo "hello world!" 
 
+#""""""""""""""""""""""""""""""
+#  = targets for load tests =
+#...
+
+    loadtest:
+        - extension: 
+            name: xhtml
+            from: [sweetpotato,extensions]
+        - lock:
+            - workfile:
+                path: my.html
+                overwrite: True
+                xhtml:   
+                    - head:
+                        title: mysite
+                        do:
+                            - style:
+                                path: my.css
+                            - script:
+                                path: my.js
+                    - body:
+                        - div:
+                            id: content
+                            do:
+                                - h: My Page
+                                - h: [2,About My Page]
+                                - p:  informative paragraph
+                        - div: 
+                            id: header
+                            do:
+                                - p: "my site"
+                        - div:
+                            id: footer
+                            do:
+                                -p: "some footer message"
 
 #""""""""""""""""""""""""""""""
 #  = Inline Data =

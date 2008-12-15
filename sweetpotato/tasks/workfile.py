@@ -1,7 +1,7 @@
 """ sweetpotato module for workfile task adapter
 """
 
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 import os, logging
 
 
@@ -35,12 +35,13 @@ class workfile(TaskAdapter):
                     self.task.log("backup to %s" % dst, logging.DEBUG)
                 else:
                     update = False
-                    self.task.log("file %s exists)" % self.path, logging.DEBUG)
+                    self.task.log("file %s exists" % self.path, logging.DEBUG)
         if update or self.task.getProperty("overwrite"):
-                self.task.log("open file %s (%s)" % (self.path, mode), logging.DEBUG)
-                self.file = open(self.path, mode)
-        if update:
+            self.task.log("open file %s (%s)" % (self.path, mode), logging.DEBUG)
+            self.file = open(self.path, mode)
             TaskAdapter.runChildTasks(self)
+        else:
+            self.task.log("%s: nothing to do" % self.path, logging.INFO)
 
     def run(self):
         self.file.close()

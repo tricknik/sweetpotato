@@ -1,6 +1,6 @@
 """ set a build token for use in property expansions
 """
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 
 class token(TaskAdapter):
     """ set a build token for use in property expansions

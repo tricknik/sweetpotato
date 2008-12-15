@@ -1,6 +1,6 @@
 """ database interface module
 """
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 
 class db(TaskAdapter):
     """ database interface module

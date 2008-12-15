@@ -1,8 +1,65 @@
 from collections import deque
-from tasks.adapter import TaskAdapter
 import yaml, re, logging
 
+def __main__():
+    """ Core Sweetpotato Classes
+
+        Sweetpotato has a small core with three classes:
+         - A Sweetpotato instance is a running process
+         - A Task does something and can contain child tasks
+         - A Task Adapter defines what a task does 
+
+        Sweetpotato is extended by creating task adapters
+
+        Define a simple task adapter:
+
+        >>> class myadapter(TaskAdapter):
+        ...     def runChildTasks(self):
+        ...         print 'A SWEETPOTATO'
+        ...         TaskAdapter.runChildTasks(self)
+        ...     def run(self):
+        ...         print self.task.getProperty('value')
+
+        Define some build data:
+
+        >>> data = {'sweetpotato': 
+        ...             {'test': 
+        ...                 [{'myadapter': 'IS NOT A YAM'}]}}
+
+        The root element must be 'sweetpotato', which contains 
+        list of targets, each target is a transaction that
+        contains a tree of tasks.
+
+        A target is implemented as a task with no type.
+
+        Instantiate a sweetpotato session, load the test data and 
+        run the test target:
+
+        >>> sp = SweetPotato()
+        >>> sp.addAdapter(myadapter)
+        >>> sp.load(data)
+        >>> sp.run('test')
+        A SWEETPOTATO
+        IS NOT A YAM
+    """
+
+class TaskAdapter:
+    """ Base TaskAdapter module
+        All new task types require an
+        adapter that extends this class
+   """
+    def __init__(self, task):
+        self.task = task
+    def runChildTasks(self):
+        for task in self.task.tasks:
+            task.run()
+        if hasattr(self, "run"):
+            self.run()
+
+
 class Task:
+    """ Process control task
+    """
     taskCount = 0
     def __init__(self, sweetpotato, parent, type, data):
         Task.taskCount = Task.taskCount + 1
@@ -13,7 +70,8 @@ class Task:
         self.parent = parent
         self.type = str(type)
         self.adapter = TaskAdapter(self)
-        self.log("creating task %s with type %s" % (self.taskId, self.type), logging.DEBUG)
+        self.log("creating task %s with type %s" % 
+                (self.taskId, self.type), logging.DEBUG)
         self.read("value", data)
 
     def read(self, property, data):
@@ -74,13 +132,17 @@ class Task:
     def loadAdapter(self):
         module = None
         parent = self.parent
-        while parent:
-            if hasattr(parent.adapter, self.type):
-                module = parent.adapter
-            parent = parent.parent
-        if not module:
-            module = self.importModule(self.type)
-        self.adapter = getattr(module, self.type)(self)
+        if self.type in globals():
+            self.log("%s loaded from globals" % self.type, logging.DEBUG)
+            self.adapter = globals()[self.type](self)
+        else:
+            while parent:
+                if hasattr(parent.adapter, self.type):
+                    module = parent.adapter
+                parent = parent.parent
+            if not module:
+                module = self.importModule(self.type)
+            self.adapter = getattr(module, self.type)(self)
 
     def importModule(self, type):
         from copy import copy
@@ -92,9 +154,11 @@ class Task:
             taskModule = ".".join(nameList)
             try:
                 module =  __import__(taskModule, fromlist=fromList)
-                self.log("%s loaded from %s" % (type, name), logging.DEBUG)
+                self.log("%s loaded from %s" % (type, fromList), logging.DEBUG)
+                break
             except ImportError:
-                self.log("%s not in %s" % (type, name), logging.DEBUG)
+                module = None
+                self.log("%s not in %s" % (type, fromList), logging.DEBUG)
         if not module:
             raise Exception, "Unable to load %s" % type
         return module
@@ -149,10 +213,13 @@ class Task:
         strType = ".".join(typePath)
         return strType
 
+
 class SweetPotato:
+    """ Process control instance
+    """
     regex = re.compile("\{\{([^}]+)\}\}")
 
-    def __init__(self, options):
+    def __init__(self, options={}):
         self.modules = {"core": ["sweetpotato", "tasks"]}
         self.options = options
         self.tokens = {}
@@ -172,8 +239,9 @@ class SweetPotato:
                 logLevel = logging.INFO
             elif "debug" == self.options.log_level:
                 logLevel = logging.DEBUG
-        file = options.file
-        self.load(file)
+        if hasattr(self.options, "file"):
+            file = options.file
+            self.open(file)
         self.targets = {}
         self.startTime = None
         self.loggers = {}
@@ -181,12 +249,18 @@ class SweetPotato:
             format='%(asctime)s %(name)-12s %(levelname)-5s %(message)s',
             datefmt='%m-%d %H:%M')
 
+    def addAdapter(self, adapterClass):
+        globals()[adapterClass.__name__] = adapterClass
+
     def loadExtension(self, name, fromList):
         self.modules[name] = fromList
 
-    def load(self, buildfile):
-        yamlData =  yaml.load(open(buildfile))
-        self.buildData = yamlData["sweetpotato"]
+    def open(self, buildfile):
+        yamlData = yaml.load(open(buildfile))
+        self.load(yamlData)
+
+    def load(self, data):
+        self.buildData = data["sweetpotato"]
 
     def setToken(self, key, value):
         self.tokens[key.strip().lower()] = value
@@ -205,6 +279,7 @@ class SweetPotato:
         if not loggerKey in self.loggers:
             self.loggers[loggerKey] = logging.getLogger(loggerKey)
         self.loggers[loggerKey].log(level, message)
+
     def require(self, targetName):
         if not targetName in self.targets:
             target = self.getTarget(targetName)
@@ -217,3 +292,11 @@ class SweetPotato:
         target = self.getTarget(targetName)
         target.run()
         self.log("%s Ended" % targetName.title(), level=logging.DEBUG)
+
+def _test():
+    import doctest
+    doctest.testmod()
+
+if __name__ == "__main__":
+        _test()
+

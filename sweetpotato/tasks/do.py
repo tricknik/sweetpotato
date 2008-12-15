@@ -1,4 +1,4 @@
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 
 class do(TaskAdapter):
 	def run(self):

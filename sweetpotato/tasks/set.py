@@ -1,6 +1,6 @@
 """ set a task property
 """
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 
 class set(TaskAdapter):
     """ set a task property

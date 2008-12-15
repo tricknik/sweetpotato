@@ -1,4 +1,4 @@
-from adapter import TaskAdapter
+from sweetpotato.core import TaskAdapter
 """ out to standard logger
 """
 class echo(TaskAdapter):
