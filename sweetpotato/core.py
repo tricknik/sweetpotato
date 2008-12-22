@@ -1,48 +1,6 @@
 from collections import deque
 import yaml, re, logging
 
-def __main__():
-    """ Core Sweetpotato Classes
-
-        Sweetpotato has a small core with three classes:
-         - A Sweetpotato instance is a running process
-         - A Task does something and can contain child tasks
-         - A Task Adapter defines what a task does 
-
-        Sweetpotato is extended by creating task adapters
-
-        Define a simple task adapter:
-
-        >>> class myadapter(TaskAdapter):
-        ...     def runChildTasks(self):
-        ...         print 'A SWEETPOTATO'
-        ...         TaskAdapter.runChildTasks(self)
-        ...     def run(self):
-        ...         print self.task.getProperty('value')
-
-        Define some build data:
-
-        >>> data = {'sweetpotato': 
-        ...             {'test': 
-        ...                 [{'myadapter': 'IS NOT A YAM'}]}}
-
-        The root element must be 'sweetpotato', which contains 
-        list of targets, each target is a transaction that
-        contains a tree of tasks.
-
-        A target is implemented as a task with no type.
-
-        Instantiate a sweetpotato session, load the test data and 
-        run the test target:
-
-        >>> sp = SweetPotato()
-        >>> sp.addAdapter(myadapter)
-        >>> sp.load(data)
-        >>> sp.run('test')
-        A SWEETPOTATO
-        IS NOT A YAM
-    """
-
 class TaskAdapter:
     """ Base TaskAdapter module
         All new task types require an
@@ -103,7 +61,7 @@ class Task:
     def readList(self, data, property="value"):
         while data:
             value = data.pop()
-            if hasattr(value, "popitem"):    
+            if hasattr(value, "popitem"):
                 itemkey, itemdata = value.items()[0]
                 if hasattr(itemdata, 'append') \
                         and not hasattr(itemdata[0], 'pop'):
@@ -114,7 +72,7 @@ class Task:
                 self.setProperty(property, value)
 
     def addChildTask(self, value, property="value"):
-        if hasattr(value, "popitem"):    
+        if hasattr(value, "popitem"):
             itemkey, itemvalue = value.popitem()
             child = Task(self.sweetpotato, self, itemkey, itemvalue)
             self.tasks.appendleft(child)
@@ -132,17 +90,20 @@ class Task:
     def loadAdapter(self):
         module = None
         parent = self.parent
-        if self.type in globals():
-            self.log("%s loaded from globals" % self.type, logging.DEBUG)
-            self.adapter = globals()[self.type](self)
-        else:
-            while parent:
-                if hasattr(parent.adapter, self.type):
-                    module = parent.adapter
-                parent = parent.parent
-            if not module:
+        while parent:
+            if hasattr(parent.adapter, self.type):
+                module = parent.adapter
+                self.adapter = getattr(module, self.type)(self)
+                self.log("%s loaded from %s" % (self.type, parent.type), logging.DEBUG)
+                break
+            parent = parent.parent
+        if not module: 
+            if self.type in globals():
+                self.adapter = globals()[self.type](self)
+                self.log("%s loaded from globals" % self.type, logging.DEBUG)
+            else:
                 module = self.importModule(self.type)
-            self.adapter = getattr(module, self.type)(self)
+                self.adapter = getattr(module, self.type)(self)
 
     def importModule(self, type):
         from copy import copy
@@ -295,7 +256,7 @@ class SweetPotato:
 
 def _test():
     import doctest
-    doctest.testmod()
+    doctest.testfile('core.doctest')
 
 if __name__ == "__main__":
         _test()
