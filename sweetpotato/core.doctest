@@ -12,8 +12,8 @@ Sweetpotato is extended by creating task adapters
 
 Define a simple task adapter:
 
->>> import sys
->>> sys.path.append("/home/dk/work/sweetpotato")
+>>> import sys, os
+>>> sys.path.append(os.path.abspath(os.curdir))
 >>> from sweetpotato.core import SweetPotato, TaskAdapter
 >>> class myadapter(TaskAdapter):
 ...     def runChildTasks(self):
@@ -45,3 +45,4 @@ run the test target:
 >>> sp.run('test')
 A SWEETPOTATO
 IS NOT A YAM
+
