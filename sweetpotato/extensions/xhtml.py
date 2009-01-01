@@ -26,11 +26,11 @@ class htmlElement(TaskAdapter):
             if elementAttributes:
                 attributes = " " + " ".join(elementAttributes)
         if self.block:
-            indent = "\n" + "\t" * htmlElement.level
+            indent = "\n" + " " * htmlElement.level
             htmlElement.level = htmlElement.level + 1
             self.blockMode = True
         elif htmlElement.blockMode:
-            indent = "\n" + "\t" * htmlElement.level
+            indent = "\n" + " " * htmlElement.level
             self.blockMode = False
         parent.adapter.file.write("%s<%s%s>" % (indent, self.tag, attributes))
         TaskAdapter.runChildTasks(self)
@@ -42,7 +42,7 @@ class htmlElement(TaskAdapter):
             if value:
                 value = value + "\n"
             htmlElement.level = htmlElement.level - 1
-            indent = "\n" + "\t" * htmlElement.level
+            indent = "\n" + " " * htmlElement.level
         parent.adapter.file.write("%s%s</%s>" % (value, indent, self.tag))
  
 class xhtml(htmlElement):
@@ -73,14 +73,19 @@ class xhtml(htmlElement):
     >>> sp.yaml(data)
     >>> sp.run('test')
     >>> f = open('test.html').read()
-    >>> f.find('<html>') >= 0
-    True
-    >>> f.find('<head>') >= 0
-    True
-    >>> f.find('</head>') > 0
-    True
-    >>> f.find('</html>') > 0
-    True
+    >>> print f
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html>
+     <head>
+      <title>Test Page</title>
+     </head>
+     <body>
+      <div id="content">
+       <p>Hello World!</p>
+      </div>
+     </body>
+    </html>
+    <BLANKLINE>
     >>> #os.remove('test.html')
     """
     def runChildTasks(self):
