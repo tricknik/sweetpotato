@@ -83,7 +83,20 @@ class xhtml(htmlElement):
     True
     >>> #os.remove('test.html')
     """
-    pass
+    def runChildTasks(self):
+        top = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+
+        xmlns="http://www.w3.org/1999/xhtml"
+        self.task.setProperty("xmlns", "http://www.w3.org/1999/xhtml")
+        parent = self.task.getParent('workfile')
+        parent.adapter.file.write(top)
+        htmlElement.runChildTasks(self)
+
+    def run(self):
+        htmlElement.run(self)
+        parent = self.task.getParent('workfile') 
+        parent.adapter.file.write("\n")
+ 
     class head(htmlElement):
         tag = "head"
         class title(htmlElement):
