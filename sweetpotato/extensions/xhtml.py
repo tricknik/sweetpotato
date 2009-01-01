@@ -99,8 +99,9 @@ class xhtml(htmlElement):
                     tag = "td"
         class div(htmlElement):
             tag = "div"
-        class p(TaskAdapter):
+        class p(htmlElement):
             tag = "p"
+            block = False
      
 def _test():
     import doctest
