@@ -220,6 +220,10 @@ class SweetPotato:
         yamlData = yaml.load(open(buildfile))
         self.load(yamlData)
 
+    def yaml(self, yamlStream):
+        yamlData = yaml.load(yamlStream)
+        self.load(yamlData)
+
     def load(self, data):
         self.buildData = data["sweetpotato"]
 

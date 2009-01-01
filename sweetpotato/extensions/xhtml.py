@@ -12,6 +12,7 @@ class htmlElement(TaskAdapter):
     tag = 'html'
     block = True
     blockMode = True
+    attributeList = ['id','class'] 
     def runChildTasks(self):
         parent = self.task.getParent('workfile')
         indent = ""
@@ -19,14 +20,17 @@ class htmlElement(TaskAdapter):
         if self.task.properties:
             elementAttributes = []
             for key in self.task.properties.keys():
-                elementAttributes.append("%s=%s" % (key, self.task.getProperty(key)))
-            attributes = " " + " ".join(elementAttributes)
+                if key in self.attributeList:
+                    elementAttributes.append("%s=\"%s\"" % \
+                        (key, self.task.getProperty(key)))
+            if elementAttributes:
+                attributes = " " + " ".join(elementAttributes)
         if self.block:
             indent = "\n" + "\t" * htmlElement.level
             htmlElement.level = htmlElement.level + 1
             self.blockMode = True
-        elif htmlElement.blockMode
-            indent = "\n"
+        elif htmlElement.blockMode:
+            indent = "\n" + "\t" * htmlElement.level
             self.blockMode = False
         parent.adapter.file.write("%s<%s%s>" % (indent, self.tag, attributes))
         TaskAdapter.runChildTasks(self)
@@ -48,18 +52,25 @@ class xhtml(htmlElement):
     >>> import sys, os
     >>> sys.path.append(os.path.abspath(os.curdir))
     >>> from sweetpotato.core import SweetPotato
-    >>> data = {'sweetpotato':
-    ...     {'test':
-    ...         [{'workfile': 
-    ...             {'path':'test.html',
-    ...                 'do': [
-    ... {'xhtml':[
-    ...     {'head': [{'title':'xhtml writer'}]},
-    ...     {'body': [{'div': [{'p':'xhtml writer'}]}]}
-    ... ]}]}}]}}
+    >>> data = '''
+    ... sweetpotato:
+    ...   test:
+    ...     - workfile:
+    ...        path: test.html 
+    ...        overwrite: True
+    ...        do:
+    ...         - xhtml:
+    ...           - head:
+    ...             - title: Test Page
+    ...           - body:
+    ...             - div:
+    ...                id: content
+    ...                do:
+    ...                 - p: Hello World!
+    ... '''
     >>> sp = SweetPotato()
     >>> sp.addAdapter(xhtml)
-    >>> sp.load(data)
+    >>> sp.yaml(data)
     >>> sp.run('test')
     >>> f = open('test.html').read()
     >>> f.find('<html>') >= 0
