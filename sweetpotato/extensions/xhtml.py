@@ -1,23 +1,47 @@
 """ sweetpotato module for xhtml taskadapters
 """
-m
 if __name__ == "__main__":
     import sys, os
     sys.path.append(os.path.abspath(os.curdir))
 
 from sweetpotato.core import TaskAdapter
 import os, logging
+
 class htmlElement(TaskAdapter):
+    level = 0
     tag = 'html'
+    block = True
+    blockMode = True
     def runChildTasks(self):
         parent = self.task.getParent('workfile')
-        parent.adapter.file.write("<%s>\n" % self.tag)
+        indent = ""
+        attributes = ""
+        if self.task.properties:
+            elementAttributes = []
+            for key in self.task.properties.keys():
+                elementAttributes.append("%s=%s" % (key, self.task.getProperty(key)))
+            attributes = " " + " ".join(elementAttributes)
+        if self.block:
+            indent = "\n" + "\t" * htmlElement.level
+            htmlElement.level = htmlElement.level + 1
+            self.blockMode = True
+        elif htmlElement.blockMode
+            indent = "\n"
+            self.blockMode = False
+        parent.adapter.file.write("%s<%s%s>" % (indent, self.tag, attributes))
         TaskAdapter.runChildTasks(self)
     def run(self):
-        parent = self.task.getParent('workfile')
-        parent.adapter.file.write("\n</%s>\n" % self.tag)
+        parent = self.task.getParent('workfile') 
+        value = self.task.getProperty('value') 
+        indent = ""
+        if self.block:
+            if value:
+                value = value + "\n"
+            htmlElement.level = htmlElement.level - 1
+            indent = "\n" + "\t" * htmlElement.level
+        parent.adapter.file.write("%s%s</%s>" % (value, indent, self.tag))
  
-class xhtml(TaskAdapter):
+class xhtml(htmlElement):
     """ 
     write xhtml to a working file
 
@@ -31,7 +55,7 @@ class xhtml(TaskAdapter):
     ...                 'do': [
     ... {'xhtml':[
     ...     {'head': [{'title':'xhtml writer'}]},
-    ...     {'div': [{'p':'xhtml writer'}]}
+    ...     {'body': [{'div': [{'p':'xhtml writer'}]}]}
     ... ]}]}}]}}
     >>> sp = SweetPotato()
     >>> sp.addAdapter(xhtml)
@@ -48,41 +72,25 @@ class xhtml(TaskAdapter):
     True
     >>> #os.remove('test.html')
     """
-
-    def runChildTasks(self):
-        parent = self.task.getParent('workfile')
-        parent.adapter.file.write("<html>\n")
-        TaskAdapter.runChildTasks(self)
-    def run(self):
-        parent = self.task.getParent('workfile')
-        parent.adapter.file.write("\n</html>\n")
-    class head(TaskAdapter):
-        def runChildTasks(self):
-            parent = self.task.getParent('workfile')
-            parent.adapter.file.write("\n\t<head>\n")
-            TaskAdapter.runChildTasks(self)
-        def run(self):
-            parent = self.task.getParent('workfile')
-            parent.adapter.file.write("\n\t</head>\n")
-        class title(TaskAdapter):
-            def run(self):
-                parent = self.task.getParent('workfile')
-                value = self.task.getProperty('value') 
-                parent.adapter.file.write("<title>%s</title>" % value)
-    class div(TaskAdapter):
-        def runChildTasks(self):
-            parent = self.task.getParent('workfile')
-            parent.adapter.file.write("\n<div>\n")
-            TaskAdapter.runChildTasks(self)
-        def run(self):
-            parent = self.task.getParent('workfile')
-            parent.adapter.file.write("\n</div>\n")
-    class p(TaskAdapter):
-        def run(self):
-            parent = self.task.getParent('workfile')
-            value = self.task.getProperty('value') 
-            parent.adapter.file.write("<p>%s</p>" % value)
- 
+    pass
+    class head(htmlElement):
+        tag = "head"
+        class title(htmlElement):
+            tag = "title"
+            block = False 
+    class body(htmlElement):
+        tag = "body"
+        class table(htmlElement):
+            tag = "table"
+            class tr(htmlElement):
+                tag = "tr"
+                class td(htmlElement):
+                    tag = "td"
+        class div(htmlElement):
+            tag = "div"
+        class p(TaskAdapter):
+            tag = "p"
+     
 def _test():
     import doctest
     doctest.testmod()
