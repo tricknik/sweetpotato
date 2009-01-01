@@ -85,7 +85,7 @@ class xhtml(htmlElement):
      </body>
     </html>
     <BLANKLINE>
-    >>> #os.remove('test.html')
+    >>> os.remove('test.html')
     """
     def runChildTasks(self):
         top = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
@@ -103,19 +103,26 @@ class xhtml(htmlElement):
  
     class head(htmlElement):
         tag = "head"
+
         class title(htmlElement):
             tag = "title"
             block = False 
+
     class body(htmlElement):
         tag = "body"
+
         class table(htmlElement):
             tag = "table"
+
             class tr(htmlElement):
                 tag = "tr"
+
                 class td(htmlElement):
                     tag = "td"
+
         class div(htmlElement):
             tag = "div"
+
         class p(htmlElement):
             tag = "p"
             block = False
