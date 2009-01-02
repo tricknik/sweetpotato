@@ -12,9 +12,18 @@ class htmlElement(TaskAdapter):
     tag = 'html'
     block = True
     blockMode = True
+    startWithNewLine = True
     attributeList = ['id','class'] 
+    def __init__(self, task):
+        self.hasChildElements = False   
+        TaskAdapter.__init__(self, task)
     def runChildTasks(self):
-        parent = self.task.getParent('workfile')
+        workfile = self.task.getParent('workfile')
+        parentTag = self.task.getParentWithAttribute('hasChildElements')
+        if hasattr(parentTag.adapter,'hasChildElements') and \
+                not parentTag.adapter.hasChildElements:
+            workfile.adapter.file.write(">")
+            parentTag.adapter.hasChildElements = True
         indent = ""
         attributes = ""
         if self.task.properties:
@@ -25,14 +34,13 @@ class htmlElement(TaskAdapter):
                         (key, self.task.getProperty(key)))
             if elementAttributes:
                 attributes = " " + " ".join(elementAttributes)
+        if self.block or htmlElement.blockMode or self.startWithNewLine:
+                indent = "\n" + " " * htmlElement.level
         if self.block:
-            indent = "\n" + " " * htmlElement.level
             htmlElement.level = htmlElement.level + 1
             self.blockMode = True
-        elif htmlElement.blockMode:
-            indent = "\n" + " " * htmlElement.level
-            self.blockMode = False
-        parent.adapter.file.write("%s<%s%s>" % (indent, self.tag, attributes))
+        workfile.adapter.file.write("%s<%s%s" % (indent, self.tag, attributes))
+        htmlElement.blockMode = self.block
         TaskAdapter.runChildTasks(self)
     def run(self):
         parent = self.task.getParent('workfile') 
@@ -43,8 +51,13 @@ class htmlElement(TaskAdapter):
                 value = value + "\n"
             htmlElement.level = htmlElement.level - 1
             indent = "\n" + " " * htmlElement.level
-        parent.adapter.file.write("%s%s</%s>" % (value, indent, self.tag))
- 
+        if self.hasChildElements:
+            parent.adapter.file.write("%s%s</%s>" % (value, indent, self.tag))
+        elif value:
+            parent.adapter.file.write(">%s%s</%s>" % (value, indent, self.tag))
+        else:
+            parent.adapter.file.write(" />")
+
 class xhtml(htmlElement):
     """ 
     write xhtml to a working file
@@ -54,43 +67,50 @@ class xhtml(htmlElement):
     >>> from sweetpotato.core import SweetPotato
     >>> data = '''
     ... sweetpotato:
-    ...   test:
-    ...     - workfile:
-    ...        path: test.html 
-    ...        overwrite: True
-    ...        do:
-    ...         - xhtml:
-    ...           - head:
-    ...             - title: Test Page
-    ...           - body:
-    ...             - div:
-    ...                id: content
-    ...                do:
-    ...                 - p: Hello World!
+    ...  test:
+    ...   - workfile:
+    ...      path: /tmp/test.html 
+    ...      overwrite: True
+    ...      do:
+    ...       - xhtml:
+    ...         - head:
+    ...           - title: Test Page
+    ...         - body:
+    ...           - div:
+    ...              id: content
+    ...              do:
+    ...               - h1: A Title
+    ...               - h2: A subtitle
+    ...               - img:
+    ...                  src: someimage.jpg
+    ...               - p: Hello World!
     ... '''
     >>> sp = SweetPotato()
     >>> sp.addAdapter(xhtml)
     >>> sp.yaml(data)
     >>> sp.run('test')
-    >>> print open('test.html').read()
+    >>> print open('/tmp/test.html').read()
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html>
+    <html xmlns="http://www.w3.org/1999/xhtml">
      <head>
       <title>Test Page</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
      </head>
      <body>
       <div id="content">
+       <h1>A Title</h1>
+       <h2>A subtitle</h2>
+       <img src="someimage.jpg" />
        <p>Hello World!</p>
       </div>
      </body>
     </html>
     <BLANKLINE>
-    >>> os.remove('test.html')
+    >>> os.remove('/tmp/test.html')
     """
+    attributeList = ['xmlns'] 
     def runChildTasks(self):
         top = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-
-        xmlns="http://www.w3.org/1999/xhtml"
         self.task.setProperty("xmlns", "http://www.w3.org/1999/xhtml")
         parent = self.task.getParent('workfile')
         parent.adapter.file.write(top)
@@ -103,10 +123,33 @@ class xhtml(htmlElement):
  
     class head(htmlElement):
         tag = "head"
-
+        def run(self):
+            parent = self.task.getParent('workfile') 
+            element = '\n  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+            parent.adapter.file.write(element)
+            htmlElement.run(self)
+     
         class title(htmlElement):
             tag = "title"
             block = False 
+
+        class meta(htmlElement):
+            tag = "meta"
+            block = False 
+            attributeList = ['name', 'content'] 
+
+        class link(htmlElement):
+            tag = "meta"
+            block = False 
+            attributeList = ['rel', 'href', 'title', 'type'] 
+
+        class style(htmlElement):
+            tag = "style"
+            attributeList = ['type'] 
+
+        class script(htmlElement):
+            tag = "script"
+            attributeList = ['type', 'src'] 
 
     class body(htmlElement):
         tag = "body"
@@ -126,7 +169,28 @@ class xhtml(htmlElement):
         class p(htmlElement):
             tag = "p"
             block = False
-     
+
+        class h1(htmlElement):
+            tag = "h1"
+            block = False
+
+        class h2(h1):
+            tag = "h2"
+
+        class h3(h1):
+            tag = "h3"
+
+        class h3(h1):
+            tag = "h3"
+
+        class h4(h1):
+            tag = "h4"
+
+        class img(htmlElement):
+            tag = "img"
+            attributeList = ['id', 'class', 'src'] 
+
+
 def _test():
     import doctest
     doctest.testmod()

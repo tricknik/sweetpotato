@@ -87,6 +87,12 @@ class Task:
             parent = parent.parent
         return parent
 
+    def getParentWithAttribute(self, attribute):
+        parent = self.parent
+        while parent.parent and not hasattr(parent.adapter, attribute):
+            parent = parent.parent
+        return parent
+
     def loadAdapter(self):
         module = None
         parent = self.parent
