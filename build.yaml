@@ -69,32 +69,46 @@ sweetpotato:
                 - write: echo "hello world!" 
 
 #""""""""""""""""""""""""""""""
-#  = targets for load tests =
+#  = targets for xhtml tests =
 #...
 
-    loadtest:
+    publishfromwiki:
+       - db:
+            type: moincategory
+            url: "http://localhost/mywiki/CategoryPublish"
+            read:
+                target: parsepage
+                fields:
+                    title: pageTitle 
+                    url: pageUrl
+                    name: pageName 
+
+    parsepage:
         - extension: 
+            name: www
+            from: [sweetpotato,extensions]
+        - www:
+            url: "{{pageUrl}}"
+            select:
+                pageContent: "#content"
+        - do:
+                target: buildpage
+                
+    buildpage:
+       - extension: 
             name: xhtml
             from: [sweetpotato,extensions]
-        - lock:
+       - lock:
             - workfile:
-                path: my.html
+                path: "{{pageName}}.html"
                 overwrite: True
                 xhtml:   
                     - head:
-                        title: mysite
-                        do:
-                            - style:
-                                path: my.css
-                            - script:
-                                path: my.js
+                        - title: "{{pageTitle}}"
                     - body:
                         - div:
                             id: content
-                            do:
-                                - h: My Page
-                                - h: [2,About My Page]
-                                - p:  informative paragraph
+                            value: "{{pageContent}}"
                         - div: 
                             id: header
                             do:
@@ -102,7 +116,7 @@ sweetpotato:
                         - div:
                             id: footer
                             do:
-                                -p: "some footer message"
+                                - p: "{{pageUrl}}"
 
 #""""""""""""""""""""""""""""""
 #  = Inline Data =

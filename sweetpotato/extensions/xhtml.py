@@ -10,6 +10,7 @@ import os, logging
 class htmlElement(TaskAdapter):
     level = 0
     tag = 'html'
+    contentProperty = 'value'
     block = True
     blockMode = True
     startWithNewLine = True
@@ -44,7 +45,7 @@ class htmlElement(TaskAdapter):
         TaskAdapter.runChildTasks(self)
     def run(self):
         parent = self.task.getParent('workfile') 
-        value = self.task.getProperty('value') 
+        value = self.task.getProperty(self.contentProperty)
         indent = ""
         if self.block:
             if value:
@@ -120,7 +121,8 @@ class xhtml(htmlElement):
         htmlElement.run(self)
         parent = self.task.getParent('workfile') 
         parent.adapter.file.write("\n")
- 
+
+           
     class head(htmlElement):
         tag = "head"
         def run(self):
@@ -190,6 +192,16 @@ class xhtml(htmlElement):
             tag = "img"
             attributeList = ['id', 'class', 'src'] 
 
+        class ul(htmlElement):
+            tag = "ul"
+            class li(htmlElement):
+                tag = "li"
+                block = False
+                contentProperty = "option"
+                attributeList = ['id', 'class', 'value'] 
+
+        class ol(ul):
+            tag = "ol"
 
 def _test():
     import doctest

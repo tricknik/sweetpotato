@@ -42,10 +42,30 @@ class db(TaskAdapter):
 def dbSweetpotato(task):
         import yaml
         parent = task.getParent("db")
-        path = parent.properties["path"]
-        task.log("from %s" % path)
+        path = parent.getProperty("path")
+        task.log("reading from %s" % path)
         data = yaml.load(open(path))
         for row in data[task.properties["root"]]:
             yield row
 
+def dbMoinCategory(task):
+        from lxml.html import parse
+        from urlparse import urlsplit
+        parent = task.getParent("db")
+        url = parent.getProperty("url")
+        moin_url = '://'.join(urlsplit(url)[0:2])
+        task.log("reading from %s" % moin_url)
+        doc = parse(url).getroot()
+        for link in doc.cssselect('#content ol li a'):
+            page = link.attrib['href'].split('?')[0]
+            name = page.split('/').pop()
+            title = link.text_content();
+            row = {'url': '%s%s' % (moin_url, page),
+                   'name': name,
+                   'title': title}
+            yield row
+
+
 db.types["sweetpotato"] = dbSweetpotato
+db.types["moincategory"] = dbMoinCategory
+

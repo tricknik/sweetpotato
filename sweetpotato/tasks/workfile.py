@@ -12,7 +12,7 @@ class workfile(TaskAdapter):
     def runChildTasks(self):
         """ open working file for child tasks
         """
-        self.path = self.task.properties["path"]
+        self.path = self.task.getProperty("path")
         update = True
         mode = 'w'
         if os.path.exists(self.path):
