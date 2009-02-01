@@ -48,7 +48,7 @@ def dbSweetpotato(task):
         import yaml
         parent = task.getParent("db")
         path = parent.getProperty("path")
-        task.log("reading from %s" % path)
+        task.log("reading from %s" % path, logging.DEBUG)
         data = yaml.load(open(path))
         for row in data[task.properties["root"]]:
             yield row
@@ -74,7 +74,7 @@ def dbDir(task):
         import os
         parent = task.getParent("db")
         path = parent.getProperty("path")
-        task.log("listing %s" % path)
+        task.log("listing %s" % path, logging.DEBUG)
         if os.path.isdir(path):
             for item in os.listdir(path):
                 row = {'name': item}
@@ -84,7 +84,7 @@ def dbFile(task):
         import os
         parent = task.getParent("db")
         path = parent.getProperty("path")
-        task.log("reading %s" % path)
+        task.log("reading %s" % path, logging.DEBUG)
         if os.path.isfile(path):
             file = open(path)
             content = file.read()
@@ -101,7 +101,7 @@ def dbDirShift(task):
         age = parent.getProperty("age")
         if age:
             mature = time.time() - age * 60
-        task.log("shifting %s" % path)
+        task.log("shifting %s" % path, logging.DEBUG)
         if os.path.isdir(path):
             row = None
             first = None
@@ -117,7 +117,7 @@ def dbDirShift(task):
 def dbSmsInbox(task):
         parent = task.getParent("db")
         delete = task.getProperty("delete")
-        task.log("reading from inbox")
+        task.log("reading from inbox", logging.DEBUG)
         import gammu
         sm = gammu.StateMachine()
         sm.ReadConfig()
