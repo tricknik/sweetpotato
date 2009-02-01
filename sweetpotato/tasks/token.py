@@ -9,4 +9,4 @@ class token(TaskAdapter):
         sweetpotato = self.task.sweetpotato
         properties = self.task.properties
         for property in properties:
-            sweetpotato.setToken(property, properties[property])
+            sweetpotato.setToken(property, self.task.getProperty(property))

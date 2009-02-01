@@ -1,6 +1,7 @@
 """ database interface module
 """
 from sweetpotato.core import TaskAdapter
+import logging
 
 class db(TaskAdapter):
     """ database interface module
@@ -20,7 +21,7 @@ class db(TaskAdapter):
             for row in db.types[type](self.task):
                 self.setTokens(row)
                 if "target" in self.task.properties:
-                    target = self.task.properties["target"]
+                    target = self.task.getProperty("target")
                     sweetpotato.run(target)
 
         def setTokens(self, row):
@@ -29,6 +30,8 @@ class db(TaskAdapter):
                 if field:
                     (name, token) = field.items()[0]
                     if name in row:
+                        self.task.log("setting %s to %s" % (token, row[name]), \
+                                logging.DEBUG)
                         sweetpotato.setToken(token, row[name])
 
         class fields(TaskAdapter):
@@ -37,6 +40,8 @@ class db(TaskAdapter):
                 fieldlist = parent.adapter.fieldlist
                 properties = self.task.properties
                 for field in properties:
+                    self.task.log("map field %s to %s" % (field, properties[field]), \
+                            logging.DEBUG)
                     fieldlist.append({field: properties[field]})
 
 def dbSweetpotato(task):
@@ -65,7 +70,81 @@ def dbMoinCategory(task):
                    'title': title}
             yield row
 
+def dbDir(task):
+        import os
+        parent = task.getParent("db")
+        path = parent.getProperty("path")
+        task.log("listing %s" % path)
+        if os.path.isdir(path):
+            for item in os.listdir(path):
+                row = {'name': item}
+                yield row
+
+def dbFile(task):
+        import os
+        parent = task.getParent("db")
+        path = parent.getProperty("path")
+        task.log("reading %s" % path)
+        if os.path.isfile(path):
+            file = open(path)
+            content = file.read()
+            row = {'path': path,
+                   'name': os.path.basename(path),
+                   'content': content.strip()
+            }
+            yield row
+
+def dbDirShift(task):
+        import os, time
+        parent = task.getParent("db")
+        path = parent.getProperty("path")
+        age = parent.getProperty("age")
+        if age:
+            mature = time.time() - age * 60
+        task.log("shifting %s" % path)
+        if os.path.isdir(path):
+            row = None
+            first = None
+            for item in os.listdir(path):
+                mtime = os.path.getmtime('/'.join((path,item)))
+                if not first or mtime < first:
+                    if not age or mtime < mature:
+                        first = mtime
+                        row = {'name': item}
+            if row:
+                yield row
+
+def dbSmsInbox(task):
+        parent = task.getParent("db")
+        delete = task.getProperty("delete")
+        task.log("reading from inbox")
+        import gammu
+        sm = gammu.StateMachine()
+        sm.ReadConfig()
+        sm.Init()
+        status = sm.GetSMSStatus()
+        remain = status['SIMUsed'] + status['PhoneUsed']
+        start = True
+        while remain > 0:
+            if start:
+                sms = sm.GetNextSMS(Start = True, Folder = 0)
+                start = False
+            else:
+                sms = sm.GetNextSMS(Location = sms[0]['Location'], Folder = 0)
+            remain = remain - 1
+            for m in sms:
+                message = {'id': str(m['DateTime']), 
+                       'text': m['Text'], 
+                       'caller_id_number': m['Number']}
+                if delete:
+                    print 'Delete location;', m['Location']
+                    sm.DeleteSMS(0, m['Location'])
+                yield message
 
 db.types["sweetpotato"] = dbSweetpotato
 db.types["moincategory"] = dbMoinCategory
+db.types["dir"] = dbDir
+db.types["file"] = dbFile
+db.types["dirshift"] = dbDirShift
+db.types["smsinbox"] = dbSmsInbox
 

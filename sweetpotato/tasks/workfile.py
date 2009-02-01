@@ -15,7 +15,9 @@ class workfile(TaskAdapter):
         self.path = self.task.getProperty("path")
         update = True
         mode = 'w'
-        if os.path.exists(self.path):
+        if not os.path.exists(os.path.dirname(self.path)):
+            os.makedirs(os.path.dirname(self.path))
+        elif os.path.exists(self.path):
             if not os.path.isfile(self.path):
                 raise Exception, "work file can not be a directory"
             if self.task.getProperty("append"):
@@ -50,6 +52,6 @@ class workfile(TaskAdapter):
         """ write data to working file
         """
         def run(self):
-            data = self.task.getProperty('value')
-            parent = self.task.getParent('workfile')
-            parent.adapter.file.write("%s\n" % data)
+            data = self.task.getProperty("value")
+            parent = self.task.getParent("workfile")
+            parent.adapter.file.write(data.encode("UTF-8"))

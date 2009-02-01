@@ -139,7 +139,7 @@ class Task:
             token = self.sweetpotato.tokens[key]    
         else:
             token = None
-        return str(token)
+        return u'%s' % token
 
     def expandValue(self, value):
         expanded = value

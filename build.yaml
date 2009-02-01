@@ -72,10 +72,17 @@ sweetpotato:
 #  = targets for xhtml tests =
 #...
 
+    publish:
+       - token:
+            wikiUrl: "http://localhost/mywiki"
+            buildDir: "/tmp/build"
+       - do:
+            target: publishfromwiki
+
     publishfromwiki:
        - db:
             type: moincategory
-            url: "http://localhost/mywiki/CategoryPublish"
+            url: "{{wikiUrl}}/CategoryPublish"
             read:
                 target: parsepage
                 fields:
@@ -91,6 +98,10 @@ sweetpotato:
             url: "{{pageUrl}}"
             select:
                 pageContent: "#content"
+        - www:
+            url: "{{wikiUrl}}/SideBar"
+            select:
+                sidebarContent: "#content"
         - do:
                 target: buildpage
                 
@@ -100,23 +111,32 @@ sweetpotato:
             from: [sweetpotato,extensions]
        - lock:
             - workfile:
-                path: "{{pageName}}.html"
+                path: "{{buildDir}}/{{pageName}}.html"
                 overwrite: True
                 xhtml:   
                     - head:
                         - title: "{{pageTitle}}"
                     - body:
                         - div:
-                            id: content
-                            value: "{{pageContent}}"
-                        - div: 
-                            id: header
+                            id: main
                             do:
-                                - p: "my site"
-                        - div:
-                            id: footer
-                            do:
-                                - p: "{{pageUrl}}"
+                                - div:
+                                    id: content
+                                    table:
+                                        - tr:
+                                            - td:
+                                                value: "{{pageContent}}"
+                                - div:
+                                    id: sidebar
+                                    value: "{{sidebarContent}}"
+                                - div: 
+                                    id: header
+                                    do:
+                                        - p: "my site"
+                                - div:
+                                    id: footer
+                                    do:
+                                        - p: "{{pageUrl}}"
 
 #""""""""""""""""""""""""""""""
 #  = Inline Data =
