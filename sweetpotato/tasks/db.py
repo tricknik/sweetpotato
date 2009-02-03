@@ -100,7 +100,7 @@ def dbDirShift(task):
         path = parent.getProperty("path")
         age = parent.getProperty("age")
         if age:
-            mature = time.time() - age * 60
+            mature = time.time() - float(age) * 60
         task.log("shifting %s" % path, logging.DEBUG)
         if os.path.isdir(path):
             row = None
@@ -117,6 +117,9 @@ def dbDirShift(task):
 def dbSmsInbox(task):
         parent = task.getParent("db")
         delete = task.getProperty("delete")
+        prefix = task.getProperty("prefix")
+        if prefix:
+            prefixLength = len(prefix)
         task.log("reading from inbox", logging.DEBUG)
         import gammu
         sm = gammu.StateMachine()
@@ -137,9 +140,9 @@ def dbSmsInbox(task):
                        'text': m['Text'], 
                        'caller_id_number': m['Number']}
                 if delete:
-                    print 'Delete location;', m['Location']
                     sm.DeleteSMS(0, m['Location'])
-                yield message
+                if not prefix or prefix == message['caller_id_number'][:prefixLength]:
+                    yield message
 
 db.types["sweetpotato"] = dbSweetpotato
 db.types["moincategory"] = dbMoinCategory
