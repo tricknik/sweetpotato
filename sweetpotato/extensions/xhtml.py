@@ -112,15 +112,18 @@ class xhtml(htmlElement):
     attributeList = ['xmlns'] 
     def runChildTasks(self):
         top = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-        self.task.setProperty("xmlns", "http://www.w3.org/1999/xhtml")
+        if not self.task.getProperty("xmlns"):
+            self.task.setProperty("xmlns", "http://www.w3.org/1999/xhtml")
         parent = self.task.getParent('workfile')
-        parent.adapter.file.write(top)
+        file = parent.adapter.getFile()
+        file.write(top)
         htmlElement.runChildTasks(self)
 
     def run(self):
         htmlElement.run(self)
         parent = self.task.getParent('workfile') 
-        parent.adapter.file.write("\n")
+        file = parent.adapter.getFile()
+        file.write("\n")
 
            
     class head(htmlElement):
@@ -141,7 +144,7 @@ class xhtml(htmlElement):
             attributeList = ['name', 'content'] 
 
         class link(htmlElement):
-            tag = "meta"
+            tag = "link"
             block = False 
             attributeList = ['rel', 'href', 'title', 'type'] 
 

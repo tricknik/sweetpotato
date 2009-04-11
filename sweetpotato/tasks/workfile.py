@@ -14,14 +14,15 @@ class workfile(TaskAdapter):
         """
         self.path = self.task.getProperty("path")
         update = True
-        mode = 'w'
+        self.mode = 'w'
+        self.file = None
         if not os.path.exists(os.path.dirname(self.path)):
             os.makedirs(os.path.dirname(self.path))
         elif os.path.exists(self.path):
             if not os.path.isfile(self.path):
                 raise Exception, "work file can not be a directory"
             if self.task.getProperty("append"):
-                mode = 'a'
+                self.mode = 'a'
             else:
                 divert =  self.task.getProperty("divert")
                 backup =  self.task.getProperty("backup")
@@ -39,19 +40,37 @@ class workfile(TaskAdapter):
                     update = False
                     self.task.log("file %s exists" % self.path, logging.DEBUG)
         if update or self.task.getProperty("overwrite"):
-            self.task.log("open file %s (%s)" % (self.path, mode), logging.DEBUG)
-            self.file = open(self.path, mode)
+            self.task.log("open file %s (%s)" % (self.path, self.mode), logging.DEBUG)
             TaskAdapter.runChildTasks(self)
         else:
             self.task.log("%s: nothing to do" % self.path, logging.INFO)
 
     def run(self):
-        self.file.close()
+        if hasattr(self.file, 'close'):
+            self.file.close()
 
+    def getFile(self):
+        if not hasattr(self.file, 'write'):
+            self.file = open(self.path, self.mode)
+        return self.file
+
+    class copy(TaskAdapter):
+        """ copy file to working file
+        """
+        def run(self):
+            import shutil
+            src = self.task.getProperty("value")
+            data = self.task.getProperty("value")
+            parent = self.task.getParent("workfile")
+            if os.path.exists(src):
+                shutil.copyfile(src, parent.adapter.path) 
+            else:
+                self.task.log("missing: %s" % src, logging.ERROR)
     class write(TaskAdapter):
         """ write data to working file
         """
         def run(self):
             data = self.task.getProperty("value")
             parent = self.task.getParent("workfile")
-            parent.adapter.file.write(data.encode("UTF-8"))
+            file = parent.adapter.getFile()
+            file.write(data.encode("UTF-8"))

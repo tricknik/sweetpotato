@@ -53,6 +53,20 @@ def dbSweetpotato(task):
         for row in data[task.properties["root"]]:
             yield row
 
+def dbWww(task):
+        from lxml.html import parse
+        from urlparse import urlsplit
+        parent = task.getParent("db")
+        url = parent.getProperty("url")
+        css = task.getProperty("css")
+        task.log("reading from %s" % url)
+        doc = parse(url).getroot()
+        for e in doc.cssselect(css):
+            row = {}
+            for attrib in e.attrib:
+                row[attrib] = e.attrib[attrib]
+            yield row
+
 def dbMoinCategory(task):
         from lxml.html import parse
         from urlparse import urlsplit
@@ -87,7 +101,8 @@ def dbFile(task):
         task.log("reading %s" % path, logging.DEBUG)
         if os.path.isfile(path):
             file = open(path)
-            content = file.read()
+            raw = file.read()
+            content = raw.decode('UTF-8')
             row = {'path': path,
                    'name': os.path.basename(path),
                    'content': content.strip()
@@ -145,6 +160,7 @@ def dbSmsInbox(task):
                     yield message
 
 db.types["sweetpotato"] = dbSweetpotato
+db.types["www"] = dbWww
 db.types["moincategory"] = dbMoinCategory
 db.types["dir"] = dbDir
 db.types["file"] = dbFile

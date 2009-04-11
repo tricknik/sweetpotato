@@ -6,7 +6,7 @@ def main():
 	from sweetpotato.core import Task, SweetPotato
 	usage = "%prog [options] target"
 	parser = OptionParser(usage=usage, version="sweetpotato 0.0.1")
-	parser.add_option("-f","--file",default="build.yaml",
+	parser.add_option("-f","--file",default="plan.yaml",
 		help="build file [default: %default]")
 	parser.add_option("-l","--list", action="store_true", help="list targets")
 	parser.add_option("-a","--list-all", action="store_true", help="list all targets")
@@ -22,6 +22,6 @@ def main():
 	sweetpotato = SweetPotato(options)
 	for target in args:
 		sweetpotato.run(target)
-		sweetpotato.log('BUILD FINISHED\n')
+		sweetpotato.log('PLAN FINISHED\n')
 if "__main__" ==  __name__:
 	main()
